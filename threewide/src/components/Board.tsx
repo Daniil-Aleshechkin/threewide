@@ -4,7 +4,7 @@ import { getColorFromBoardStateTile } from "@utils/tetris/PieceColors";
 type BoardProperties = {
   width: number;
   height: number;
-  boardState: PieceType[][];
+  boardState: PieceType[23][10];
 };
 
 function Board({ width, height, boardState }: BoardProperties) {
@@ -12,7 +12,7 @@ function Board({ width, height, boardState }: BoardProperties) {
     for (let rowNum = 3; rowNum < 23; rowNum++) {
       for (let colNum = 0; colNum < 10; colNum++) {
         ctx.fillStyle = getColorFromBoardStateTile(
-          boardState[rowNum]![colNum]!
+          (boardState[rowNum] as PieceType[23])[colNum] as PieceType
         );
         ctx.fillRect(colNum * width, rowNum * height, width, height);
       }
