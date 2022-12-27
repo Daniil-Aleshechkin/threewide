@@ -6,7 +6,7 @@ import { trpc } from "../utils/trpc";
 import Tetris from "@components/Tetris";
 import { BoardState, PieceType } from "src/types/tetris";
 import { getServerAuthSession } from "src/server/common/get-server-auth-session";
-import { Session, User } from "next-auth";
+import type { User } from "next-auth";
 import SettingsPage, { Settings } from "@components/Settings";
 import { dom } from "@fortawesome/fontawesome-svg-core";
 import Header from "@components/Header";
