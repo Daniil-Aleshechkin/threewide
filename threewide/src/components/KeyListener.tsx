@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from "react";
 import type { KeyboardEventHandler, ReactNode } from "react";
 import { useState } from "react";
 import type { Moves, Rotation } from "src/types/tetris";
-import { Settings } from "./Settings";
+import type { Settings } from "./Settings";
 
 type Direction = "left" | "right" | null;
 
@@ -107,7 +107,7 @@ const KeyListener = ({
     if (listener.current) {
       listener.current.focus();
     }
-  }, [listener.current]);
+  }, [listener]);
 
   return (
     <div
