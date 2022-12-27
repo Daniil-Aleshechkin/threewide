@@ -14,22 +14,6 @@ const HoldPiece = ({
   rotation,
   pieceType,
 }: PieceProperties) => {
-  const draw = (ctx: CanvasRenderingContext2D) => {
-    ctx.clearRect(0, 0, tileDimensions.width * 4, tileDimensions.height * 4);
-    if (pieceType == "") return;
-
-    const tiles = getTileLocationsFromPieceAndRotations(pieceType, rotation);
-    for (const tile of tiles) {
-      ctx.fillStyle = getColorFromBoardStateTile(pieceType);
-      ctx.fillRect(
-        tile[0] * tileDimensions.width,
-        tile[1] * tileDimensions.height,
-        tileDimensions.width,
-        tileDimensions.height
-      );
-    }
-  };
-
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -37,9 +21,31 @@ const HoldPiece = ({
 
     if (canvas) {
       const context = canvas.getContext("2d");
-      if (context) draw(context);
+      if (context) {
+        context.clearRect(
+          0,
+          0,
+          tileDimensions.width * 4,
+          tileDimensions.height * 4
+        );
+        if (pieceType == "") return;
+
+        const tiles = getTileLocationsFromPieceAndRotations(
+          pieceType,
+          rotation
+        );
+        for (const tile of tiles) {
+          context.fillStyle = getColorFromBoardStateTile(pieceType);
+          context.fillRect(
+            tile[0] * tileDimensions.width,
+            tile[1] * tileDimensions.height,
+            tileDimensions.width,
+            tileDimensions.height
+          );
+        }
+      }
     }
-  }, [draw]);
+  }, [pieceType]);
 
   return (
     <div className="relative z-10">

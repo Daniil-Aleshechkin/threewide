@@ -4,35 +4,33 @@ import { getTileLocationsFromPieceAndRotations } from "@utils/tetris/PieceRotati
 import { getColorFromBoardStateTile } from "@utils/tetris/PieceColors";
 
 const PieceQueue = ({ queue }: { queue: PieceType[] }) => {
-  const draw = (ctx: CanvasRenderingContext2D) => {
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, 84, 400);
-    for (let pieceNum = 0; pieceNum < 6; pieceNum++) {
-      const pieceTile = queue[pieceNum];
-      if (!pieceTile) break;
-
-      const tiles = getTileLocationsFromPieceAndRotations(pieceTile, 0);
-
-      for (const tile of tiles) {
-        ctx.fillStyle = getColorFromBoardStateTile(pieceTile);
-        ctx.fillRect(
-          12 + tile[0] * 15,
-          12 + pieceNum * 45 + tile[1] * 15,
-          15,
-          15
-        );
-      }
-    }
-  };
-
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current!;
     const context = canvas.getContext("2d");
 
-    if (context) draw(context);
-  }, [draw]);
+    if (context) {
+      context.fillStyle = "#ffffff";
+      context.fillRect(0, 0, 84, 400);
+      for (let pieceNum = 0; pieceNum < 6; pieceNum++) {
+        const pieceTile = queue[pieceNum];
+        if (!pieceTile) break;
+
+        const tiles = getTileLocationsFromPieceAndRotations(pieceTile, 0);
+
+        for (const tile of tiles) {
+          context.fillStyle = getColorFromBoardStateTile(pieceTile);
+          context.fillRect(
+            12 + tile[0] * 15,
+            12 + pieceNum * 45 + tile[1] * 15,
+            15,
+            15
+          );
+        }
+      }
+    }
+  }, [queue]);
 
   return (
     <div className="w-20 p-2">
