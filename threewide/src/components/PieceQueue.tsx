@@ -7,27 +7,28 @@ const PieceQueue = ({ queue }: { queue: PieceType[] }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    const canvas = canvasRef.current!;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
     const context = canvas.getContext("2d");
+    if (!context) return;
 
-    if (context) {
-      context.fillStyle = "#ffffff";
-      context.fillRect(0, 0, 84, 400);
-      for (let pieceNum = 0; pieceNum < 6; pieceNum++) {
-        const pieceTile = queue[pieceNum];
-        if (!pieceTile) break;
+    context.fillStyle = "#ffffff";
+    context.fillRect(0, 0, 84, 400);
+    for (let pieceNum = 0; pieceNum < 6; pieceNum++) {
+      const pieceTile = queue[pieceNum];
+      if (!pieceTile) break;
 
-        const tiles = getTileLocationsFromPieceAndRotations(pieceTile, 0);
+      const tiles = getTileLocationsFromPieceAndRotations(pieceTile, 0);
 
-        for (const tile of tiles) {
-          context.fillStyle = getColorFromBoardStateTile(pieceTile);
-          context.fillRect(
-            12 + tile[0] * 15,
-            12 + pieceNum * 45 + tile[1] * 15,
-            15,
-            15
-          );
-        }
+      for (const tile of tiles) {
+        context.fillStyle = getColorFromBoardStateTile(pieceTile);
+        context.fillRect(
+          12 + tile[0] * 15,
+          12 + pieceNum * 45 + tile[1] * 15,
+          15,
+          15
+        );
       }
     }
   }, [queue]);

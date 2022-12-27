@@ -18,34 +18,30 @@ const HoldPiece = ({
 
   useEffect(() => {
     const canvas = canvasRef.current;
+    if (!canvas) return;
 
-    if (canvas) {
-      const context = canvas.getContext("2d");
-      if (context) {
-        context.clearRect(
-          0,
-          0,
-          tileDimensions.width * 4,
-          tileDimensions.height * 4
-        );
-        if (pieceType == "") return;
+    const context = canvas.getContext("2d");
+    if (!context) return;
 
-        const tiles = getTileLocationsFromPieceAndRotations(
-          pieceType,
-          rotation
-        );
-        for (const tile of tiles) {
-          context.fillStyle = getColorFromBoardStateTile(pieceType);
-          context.fillRect(
-            tile[0] * tileDimensions.width,
-            tile[1] * tileDimensions.height,
-            tileDimensions.width,
-            tileDimensions.height
-          );
-        }
-      }
+    context.clearRect(
+      0,
+      0,
+      tileDimensions.width * 4,
+      tileDimensions.height * 4
+    );
+    if (pieceType == "") return;
+
+    const tiles = getTileLocationsFromPieceAndRotations(pieceType, rotation);
+    for (const tile of tiles) {
+      context.fillStyle = getColorFromBoardStateTile(pieceType);
+      context.fillRect(
+        tile[0] * tileDimensions.width,
+        tile[1] * tileDimensions.height,
+        tileDimensions.width,
+        tileDimensions.height
+      );
     }
-  }, [pieceType]);
+  }, [pieceType, rotation]);
 
   return (
     <div className="relative z-10">
