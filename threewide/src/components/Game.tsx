@@ -1,7 +1,12 @@
 import React, { useState } from "react";
 import type { ReactNode } from "react";
 import type { Game } from "src/models/game_description.model";
-import type { PieceType, Points, TetrisPiece } from "src/types/tetris";
+import type {
+  BoardState,
+  PieceType,
+  Points,
+  TetrisPiece,
+} from "src/types/tetris";
 import type { Settings } from "./Settings";
 import Tetris from "./Tetris";
 import SettingsPage from "./Settings";
@@ -54,7 +59,7 @@ const TetrisGame = ({
     ["", "", "", "", "", "", "", "", "", ""],
     ["", "", "", "", "", "", "", "", "", ""],
     ["", "", "", "", "", "", "", "", "", ""],
-  ] as PieceType[][];
+  ] as unknown as BoardState;
 
   const [isWin, setIsWin] = useState(false);
 
@@ -110,7 +115,7 @@ const TetrisGame = ({
     );
 
   const isTspinOrMini = (
-    board: PieceType[][],
+    board: BoardState,
     piece: TetrisPiece,
     isSlamKicked: boolean
   ): [boolean, boolean] => {
@@ -190,7 +195,7 @@ const TetrisGame = ({
     }
   };
 
-  const isAllClear = (board: PieceType[][]): boolean => {
+  const isAllClear = (board: BoardState): boolean => {
     for (const row of board) {
       for (const item of row) {
         if (item != "") {
@@ -227,8 +232,8 @@ const TetrisGame = ({
   };
 
   const onPointsGained = (
-    currentBoardState: PieceType[][],
-    completedBoardState: PieceType[][],
+    currentBoardState: BoardState,
+    completedBoardState: BoardState,
     completedPiece: TetrisPiece,
     clearedLines: number,
     combo: number
@@ -300,8 +305,8 @@ const TetrisGame = ({
   };
 
   const isBoardEqual = (
-    board1: PieceType[][] | undefined,
-    board2: PieceType[][] | undefined
+    board1: BoardState | undefined,
+    board2: BoardState | undefined
   ): boolean => {
     if (!board1 || !board2 || board1.length == 0 || board2.length == 0)
       return true;
@@ -315,7 +320,7 @@ const TetrisGame = ({
   };
 
   const onGameEnd = (
-    finalBoardState: PieceType[][],
+    finalBoardState: BoardState,
     lastPoints: Points | undefined
   ): void => {
     const finalPoints = lastPoints ?? points;
@@ -336,7 +341,7 @@ const TetrisGame = ({
       (game.goal.tspinTriples &&
         game.goal.tspinTriples != finalPoints.tspinTriples) ||
       (game.goal.finalState &&
-        !isBoardEqual(game.goal.finalState!, finalBoardState))
+        !isBoardEqual(game.goal.finalState, finalBoardState))
     )
       onGameLose();
     else {

@@ -27,3 +27,5 @@ export type TetrisPiece = {
 export interface Points extends Goal {
   backToBackLevel: number;
 }
+
+export type BoardState = PieceType[23][10];

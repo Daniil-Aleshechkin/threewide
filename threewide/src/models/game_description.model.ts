@@ -1,5 +1,5 @@
 import mongoose, { ObjectId, Types } from "mongoose";
-import { PieceType } from "src/types/tetris";
+import { BoardState, PieceType } from "src/types/tetris";
 
 export interface Goal {
   linesCleared?: number | undefined;
@@ -9,7 +9,7 @@ export interface Goal {
   tspinDoubles?: number | undefined;
   tspinMinis?: number | undefined;
   tspinMiniDoubles?: number | undefined;
-  finalState?: PieceType[][] | undefined;
+  finalState?: BoardState | undefined;
   allowAllClears?: boolean | undefined;
 }
 
@@ -18,7 +18,7 @@ interface GameDescription extends mongoose.Document<ObjectId>, Game {
 }
 
 export interface Game {
-  startingBoardState: PieceType[][];
+  startingBoardState: BoardState;
   startingPieceQueue: PieceType[];
   goal: Goal;
   gameId: string;

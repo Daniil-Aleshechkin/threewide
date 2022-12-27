@@ -10,7 +10,7 @@ import { signIn, signOut, useSession } from "next-auth/react";
 
 import { trpc } from "../utils/trpc";
 import Tetris from "@components/Tetris";
-import { PieceType } from "src/types/tetris";
+import { BoardState, PieceType } from "src/types/tetris";
 import { getServerAuthSession } from "src/server/common/get-server-auth-session";
 import { Session, User } from "next-auth";
 import SettingsPage, { Settings } from "@components/Settings";
@@ -39,7 +39,7 @@ const Home = (user: User) => {
     dasAmount: 80,
   };
 
-  const startingBoardState: PieceType[][] = [
+  const startingBoardState: BoardState = [
     ["", "", "", "", "", "", "", "", "", ""],
     ["", "", "", "", "", "", "", "", "", ""],
     ["", "", "", "", "", "", "", "", "", ""],
@@ -63,7 +63,7 @@ const Home = (user: User) => {
     ["", "", "", "", "", "", "", "", "", ""],
     ["", "", "", "", "", "", "", "", "", ""],
     ["", "", "", "", "", "", "", "", "", ""],
-  ] as PieceType[][];
+  ] as unknown as BoardState;
 
   const userSettings = trpc.user.getUserSettings.useQuery({
     userId: user.name,

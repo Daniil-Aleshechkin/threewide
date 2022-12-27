@@ -3,8 +3,17 @@ import PieceQueue from "./PieceQueue";
 import HoldPiece from "./HoldPiece";
 import { getTileLocationsFromPieceAndRotations } from "@utils/tetris/PieceRotations";
 import KeyListener from "./KeyListener";
-import { getTableFromPieceAndRotation } from "@utils/tetris/PieceKickTables";
-import { PieceType, Points, Rotation, TetrisPiece } from "../types/tetris";
+import {
+  KickTable,
+  getTableFromPieceAndRotation,
+} from "@utils/tetris/PieceKickTables";
+import {
+  BoardState,
+  PieceType,
+  Points,
+  Rotation,
+  TetrisPiece,
+} from "../types/tetris";
 import { useState, useEffect, useRef, ReactNode } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCog } from "@fortawesome/free-solid-svg-icons";
@@ -40,19 +49,19 @@ const useDebounce = (
 type TetrisProps = {
   width: number;
   height: number;
-  startingBoardState: PieceType[][];
+  startingBoardState: BoardState;
   startingPieceQueue: PieceType[];
   generatePieceQueue: boolean;
   settings: Settings;
   onPointGained?: (
-    currentBoardState: PieceType[][],
-    completedBoardState: PieceType[][],
+    currentBoardState: BoardState,
+    completedBoardState: BoardState,
     completedPiece: TetrisPiece,
     clearedLines: number,
     combo: number
   ) => Points;
   onGameEnd?: (
-    finalBoardState: PieceType[][],
+    finalBoardState: BoardState,
     lastPoints: Points | undefined
   ) => void;
   onShowSettings?: () => void;
@@ -119,10 +128,13 @@ const Tetris = ({
   const isRightDas = currentDAS.direction == "right" && currentDAS.enabled;
 
   const [currentPiece, setCurrentPiece] = useState<TetrisPiece>({
-    pieceType: startingPieceQueue.length == 0 ? "" : startingPieceQueue[0]!,
+    pieceType:
+      startingPieceQueue.length == 0
+        ? ""
+        : (startingPieceQueue[0] as PieceType),
     pieceRotation: 0,
     pieceLocation: getPieceStartingLocationFromPieceType(
-      startingPieceQueue[0]!,
+      startingPieceQueue[0] as PieceType,
       startingBoardState
     ),
     isSlamKicked: false,
@@ -137,27 +149,25 @@ const Tetris = ({
     hasHeldPiece: false,
   });
 
-  const copyBoard = (board: PieceType[][]): PieceType[][] => {
+  const copyBoard = (board: BoardState): BoardState => {
     const newBoard: PieceType[][] = [];
 
     for (const row of board) {
       const newRow: PieceType[] = [];
       for (const item of row) {
-        newRow.push(item);
+        newRow.push(item as PieceType);
       }
       newBoard.push(newRow);
     }
-    return newBoard;
+    return newBoard as unknown as BoardState;
   };
 
-  const [board, setBoard] = useState<PieceType[][]>(
-    copyBoard(startingBoardState)
-  );
+  const [board, setBoard] = useState<BoardState>(copyBoard(startingBoardState));
   const [queue, setQueue] = useState<PieceType[]>(startingPieceQueue.slice(1));
 
   function getPieceStartingLocationFromPieceType(
     pieceType: PieceType,
-    newBoard: PieceType[][]
+    newBoard: BoardState
   ): [number, number] {
     let startingYLocation = -3;
 
@@ -207,7 +217,7 @@ const Tetris = ({
 
       newQueue = newQueue.concat(generateBag());
       if (queue.length === 0) {
-        const firstPiece = newQueue[0]!;
+        const firstPiece = newQueue[0] as PieceType;
         const newPiece: TetrisPiece = {
           pieceType: firstPiece,
           pieceLocation: getPieceStartingLocationFromPieceType(
@@ -238,15 +248,15 @@ const Tetris = ({
     for (let i = 0; i < 7; i++) {
       const randIndex = Math.floor(Math.random() * 7);
       const tmp = pieces[i];
-      pieces[i] = pieces[randIndex]!;
-      pieces[randIndex] = tmp!;
+      pieces[i] = pieces[randIndex] as PieceType;
+      pieces[randIndex] = tmp as PieceType;
     }
 
     return pieces;
   }
 
   function popPiece(): PieceType {
-    const nextPiece = queue[0]!;
+    const nextPiece = queue[0];
     let newQueue = queue.slice(1);
 
     if (generatePieceQueue && queue.length <= 14) {
@@ -257,7 +267,7 @@ const Tetris = ({
 
     newQueue = fillQueue(newQueue);
     setQueue(newQueue);
-    return nextPiece;
+    return nextPiece as PieceType;
   }
 
   function onResetHandler() {
@@ -271,9 +281,9 @@ const Tetris = ({
     });
 
     const newPiece: TetrisPiece = {
-      pieceType: filledQueue[0]!,
+      pieceType: filledQueue[0] as PieceType,
       pieceLocation: getPieceStartingLocationFromPieceType(
-        filledQueue[0]!,
+        filledQueue[0] as PieceType,
         startingBoardState
       ),
       pieceRotation: 0,
@@ -316,8 +326,8 @@ const Tetris = ({
     let isSlamKicked = false;
     for (let i = 0; i < kickTables.length; i++) {
       const kickLocation: [number, number] = [
-        newLocation[0] + kickTables[i]![0],
-        newLocation[1] + kickTables[i]![1],
+        newLocation[0] + (kickTables[i] as [number, number])[0],
+        newLocation[1] + (kickTables[i] as [number, number])[1],
       ];
 
       if (isPieceMoveValidWithRotation(kickLocation, newRotation)) {
@@ -481,7 +491,7 @@ const Tetris = ({
     desiredLocation: [number, number],
     startingLocation: [number, number],
     pieceType: PieceType,
-    newBoard: PieceType[][]
+    newBoard: BoardState
   ): [number, number] {
     let newLocation = startingLocation;
 
@@ -516,7 +526,7 @@ const Tetris = ({
           tileLocation[0] + location[0],
           tileLocation[1] + location[1] + 3,
         ]) ||
-        board[location[1] + tileLocation[1] + 3]![
+        (board[location[1] + tileLocation[1] + 3] as unknown as PieceType[])[
           location[0] + tileLocation[0]
         ] !== ""
       ) {
@@ -541,7 +551,7 @@ const Tetris = ({
           tileLocation[0] + location[0],
           tileLocation[1] + location[1] + 3,
         ]) ||
-        board[location[1] + tileLocation[1] + 3]![
+        (board[location[1] + tileLocation[1] + 3] as unknown as PieceType[])[
           location[0] + tileLocation[0]
         ] !== ""
       ) {
@@ -555,7 +565,7 @@ const Tetris = ({
     location: [number, number],
     rotation: Rotation,
     pieceType: PieceType,
-    newBoard: PieceType[][]
+    newBoard: BoardState
   ): boolean {
     const tileLocations: [number, number][] =
       getTileLocationsFromPieceAndRotations(pieceType, rotation);
@@ -565,7 +575,7 @@ const Tetris = ({
           tileLocation[0] + location[0],
           tileLocation[1] + location[1] + 3,
         ]) ||
-        newBoard[location[1] + tileLocation[1] + 3]![
+        (newBoard[location[1] + tileLocation[1] + 3] as unknown as PieceType[])[
           location[0] + tileLocation[0]
         ] !== ""
       ) {
@@ -578,7 +588,7 @@ const Tetris = ({
   function isPieceMoveValidWithPieceType(
     location: [number, number],
     pieceType: PieceType,
-    newBoard: PieceType[][]
+    newBoard: BoardState
   ): boolean {
     const tileLocations: [number, number][] =
       getTileLocationsFromPieceAndRotations(pieceType, 0);
@@ -588,7 +598,7 @@ const Tetris = ({
           tileLocation[0] + location[0],
           tileLocation[1] + location[1] + 3,
         ]) ||
-        newBoard[location[1] + tileLocation[1] + 3]![
+        (newBoard[location[1] + tileLocation[1] + 3] as unknown as PieceType[])[
           location[0] + tileLocation[0]
         ] !== ""
       ) {
@@ -618,8 +628,11 @@ const Tetris = ({
       });
 
       const newPiece: TetrisPiece = {
-        pieceType: queue[0]!,
-        pieceLocation: getPieceStartingLocationFromPieceType(queue[0]!, board),
+        pieceType: queue[0] as PieceType,
+        pieceLocation: getPieceStartingLocationFromPieceType(
+          queue[0] as PieceType,
+          board
+        ),
         pieceRotation: 0,
         isSlamKicked: false,
       };
@@ -659,15 +672,18 @@ const Tetris = ({
     );
 
     for (const tileLocation of tileLocations) {
-      board[tileLocation[1] + placePieceLocation[1] + 3]![
-        tileLocation[0] + placePieceLocation[0]
-      ] = currentPieceRef.current.pieceType;
+      (
+        board[
+          tileLocation[1] + placePieceLocation[1] + 3
+        ] as unknown as PieceType[]
+      )[tileLocation[0] + placePieceLocation[0]] =
+        currentPieceRef.current.pieceType;
     }
 
     const removedYLocations = new Set<number>();
     for (const tileLocation of tileLocations) {
       const yLocationToCheck = tileLocation[1] + placePieceLocation[1] + 3;
-      if (isRowFull(board[yLocationToCheck]!)) {
+      if (isRowFull(board[yLocationToCheck] as unknown as PieceType[])) {
         removedYLocations.add(yLocationToCheck);
       }
     }
@@ -679,7 +695,7 @@ const Tetris = ({
         clearedLines += 1;
         newBoard.unshift([...EMPTY_ROW]);
       } else {
-        newBoard.push([...board[row]!]!);
+        newBoard.push([...(board[row] as PieceType)] as PieceType[]);
       }
     }
 
@@ -688,7 +704,7 @@ const Tetris = ({
     if (onPointGained && clearedLines !== 0) {
       points = onPointGained(
         board,
-        newBoard,
+        newBoard as unknown as BoardState,
         { ...currentPieceRef.current, pieceLocation: placePieceLocation },
         clearedLines,
         combo
@@ -700,15 +716,15 @@ const Tetris = ({
     } else {
       setCombo(combo + 1);
     }
-    setBoard(newBoard);
+    setBoard(newBoard as unknown as BoardState);
     setCurrentHeldPiece({ ...currentHeldPiece, hasHeldPiece: false });
     popPiece();
 
     if (
-      (queue.length == 0 || queue[0] == "") &&
+      (queue.length == 0 || queue[0] == "" || queue[0] == null) &&
       currentHeldPiece.pieceType == ""
     ) {
-      if (onGameEnd) onGameEnd(newBoard, points);
+      if (onGameEnd) onGameEnd(newBoard as unknown as BoardState, points);
       setGameOver(true);
       const newPiece: TetrisPiece = {
         pieceType: queue[0] ?? "",
@@ -722,20 +738,20 @@ const Tetris = ({
     }
 
     const nextStartingLocation = getPieceStartingLocationFromPieceType(
-      queue[0]!,
-      newBoard
+      queue[0] as PieceType,
+      newBoard as unknown as BoardState
     );
 
     if (
       !isPieceMoveValidWithRotationAndPieceType(
         nextStartingLocation,
         0,
-        queue[0]!,
-        newBoard
+        queue[0] as PieceType,
+        newBoard as unknown as BoardState
       ) ||
       !isInBoard(placePieceLocation)
     ) {
-      if (onGameEnd) onGameEnd(newBoard, points);
+      if (onGameEnd) onGameEnd(newBoard as unknown as BoardState, points);
       setGameOver(true);
       return;
     }
@@ -838,14 +854,16 @@ const Tetris = ({
   });
 
   useEffect(() => {
-    const canvas = canvasRef.current!;
-    const context = canvas.getContext("2d");
+    const canvas = canvasRef.current;
 
-    if (context) {
-      clearBoard(context);
-      drawBoard(context);
-      drawShadowPiece(context);
-      drawCurrentPiece(context);
+    if (canvas) {
+      const context = canvas.getContext("2d");
+      if (context) {
+        clearBoard(context);
+        drawBoard(context);
+        drawShadowPiece(context);
+        drawCurrentPiece(context);
+      }
     }
   }, [drawCurrentPiece]);
 

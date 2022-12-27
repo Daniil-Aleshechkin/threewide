@@ -170,11 +170,13 @@ const iKickTable: { [id: number]: { [id: number]: [number, number][] } } = {
   },
 };
 
+export type KickTable = [number, number][];
+
 function getTableFromPieceAndRotation(
   pieceType: PieceType,
   currentRotation: Rotation,
   rotation: Rotation
-): [number, number][] {
+): KickTable {
   if (rotation == 2) {
     return default180KickTable[currentRotation]!;
   } else if (pieceType == "I") {
