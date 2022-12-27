@@ -1,13 +1,7 @@
-import {
-  GetServerSideProps,
-  GetServerSidePropsContext,
-  type NextPage,
-} from "next";
+import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import { useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
-import { signIn, signOut, useSession } from "next-auth/react";
-
 import { trpc } from "../utils/trpc";
 import Tetris from "@components/Tetris";
 import { BoardState, PieceType } from "src/types/tetris";

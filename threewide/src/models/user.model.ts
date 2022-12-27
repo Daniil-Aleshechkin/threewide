@@ -1,7 +1,9 @@
 import { Settings } from "@components/Settings";
 import mongoose, { ObjectId } from "mongoose";
 
-interface UserDocument extends mongoose.Document<ObjectId>, ThreeWideUser {}
+export interface UserDocument
+  extends mongoose.Document<ObjectId>,
+    ThreeWideUser {}
 
 export interface ThreeWideUser {
   username: string;

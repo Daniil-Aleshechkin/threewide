@@ -1,5 +1,6 @@
-import mongoose, { ObjectId, Types } from "mongoose";
-import { BoardState, PieceType } from "src/types/tetris";
+import mongoose, { Types } from "mongoose";
+import type { ObjectId } from "mongoose";
+import type { BoardState, PieceType } from "src/types/tetris";
 
 export interface Goal {
   linesCleared?: number | undefined;

@@ -2,12 +2,13 @@ import NextAuth, { type NextAuthOptions } from "next-auth";
 import { User } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcrypt";
-import UserModel, { ThreeWideUser } from "src/models/user.model";
+import UserModel from "src/models/user.model";
+import type { ThreeWideUser, UserDocument } from "src/models/user.model";
 import connectMongo from "@utils/mongoose";
 
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    session({ session, user }) {
+    session({ session }) {
       return session;
     },
   },
@@ -23,15 +24,17 @@ export const authOptions: NextAuthOptions = {
         const password: string | undefined = credentials?.password;
 
         connectMongo();
-        const user = await UserModel.findOne({ username: { $eq: username } });
+        const user: UserDocument | null = await UserModel.findOne({
+          username: { $eq: username },
+        });
         if (!password || !username)
-          return new Error("Username and password is required");
+          throw new Error("Username and password is required");
 
-        if (!user) {
-          return signUpUser(password!, username!);
+        if (!user || !user._id) {
+          return signUpUser(password, username);
         }
 
-        return signInUser(password!, user!, user._id.toString());
+        return signInUser(password, user, user._id.toString());
       },
     }),
   ],
@@ -45,7 +48,6 @@ const signInUser = async (
   userId: string
 ): Promise<User> => {
   const isMatch = await bcrypt.compare(password, user.password);
-  //const isMatch = password == user.password;
 
   if (!isMatch) throw new Error("Pass don't match");
 
@@ -57,8 +59,10 @@ const signInUser = async (
   };
 };
 
-// Next auth async type defs are trash so I have to do this terribleness
-const signUpUser = async (password: string, username: string): Promise<any> => {
+const signUpUser = async (
+  password: string,
+  username: string
+): Promise<User> => {
   if (!password) throw new Error("Password is required for auth");
 
   const salt = await bcrypt.genSalt(10);
@@ -72,8 +76,8 @@ const signUpUser = async (password: string, username: string): Promise<any> => {
   });
 
   return {
-    id: newUser._id,
-    name: newUser._id,
+    id: newUser._id as unknown as string,
+    name: newUser._id as unknown as string,
     email: "no email",
     image: "no image",
   };
