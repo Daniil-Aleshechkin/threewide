@@ -240,7 +240,7 @@ const TetrisGame = ({
   ): Points => {
     let linesSent = 0;
 
-    const newPoints = { ...points };
+    const newPoints: Points = { ...points };
 
     const [isTspinMini, isTspin] = isTspinOrMini(
       currentBoardState,
@@ -257,7 +257,7 @@ const TetrisGame = ({
         linesSent += 4;
       case 3:
         if (isTspin) {
-          newPoints.tspinTriples! += 1;
+          newPoints.tspinTriples += 1;
           linesSent += 6;
         } else {
           linesSent += 2;
@@ -265,10 +265,10 @@ const TetrisGame = ({
         break;
       case 2:
         if (isTspin) {
-          newPoints.tspinDoubles! += 1;
+          newPoints.tspinDoubles += 1;
           linesSent += 4;
         } else if (isTspinMini) {
-          newPoints.tspinMiniDoubles! += 1;
+          newPoints.tspinMiniDoubles += 1;
           linesSent += 1;
         } else {
           linesSent += 1;
@@ -276,10 +276,10 @@ const TetrisGame = ({
         break;
       case 1:
         if (isTspin) {
-          newPoints.tspinSingles! += 1;
+          newPoints.tspinSingles += 1;
           linesSent += 2;
         } else if (isTspinMini) {
-          newPoints.tspinMinis! += 1;
+          newPoints.tspinMinis += 1;
           linesSent += getSingleComboAmount(combo);
         } else {
           linesSent += getSingleComboAmount(combo);
@@ -297,8 +297,8 @@ const TetrisGame = ({
       linesSent += 10;
     }
 
-    newPoints.pointsGained! += linesSent;
-    newPoints.linesCleared! += clearedLines;
+    newPoints.pointsGained += linesSent;
+    newPoints.linesCleared += clearedLines;
     setPoints(newPoints);
 
     return newPoints;
@@ -314,7 +314,10 @@ const TetrisGame = ({
     //Todo refactor to use no non-null assertions?
     for (let rowIndex = 0; rowIndex < 20; rowIndex++)
       for (let columnIndex = 0; columnIndex < 10; columnIndex++)
-        if (board1[rowIndex]![columnIndex] !== board2[rowIndex]![columnIndex])
+        if (
+          (board1[rowIndex] as unknown as PieceType[])[columnIndex] !==
+          (board2[rowIndex] as unknown as PieceType[])[columnIndex]
+        )
           return false;
     return true;
   };

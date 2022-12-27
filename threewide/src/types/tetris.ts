@@ -24,7 +24,14 @@ export type TetrisPiece = {
   isSlamKicked: boolean;
 };
 
-export interface Points extends Goal {
+export interface Points {
+  linesCleared: number;
+  pointsGained: number;
+  tspinSingles: number;
+  tspinTriples: number;
+  tspinDoubles: number;
+  tspinMinis: number;
+  tspinMiniDoubles: number;
   backToBackLevel: number;
 }
 
