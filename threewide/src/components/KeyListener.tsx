@@ -1,11 +1,7 @@
-import React, {
-  KeyboardEventHandler,
-  SyntheticEvent,
-  useEffect,
-  useRef,
-} from "react";
+import React, { useEffect, useRef } from "react";
+import type { KeyboardEventHandler, ReactNode } from "react";
 import { useState } from "react";
-import { Moves, Rotation } from "src/types/tetris";
+import type { Moves, Rotation } from "src/types/tetris";
 import { Settings } from "./Settings";
 
 type Direction = "left" | "right" | null;
@@ -24,7 +20,7 @@ type KeyListenerEventHandlers = {
   onNextGame?: () => void;
   onPreviousGame?: () => void;
   settings: Settings;
-  children: any;
+  children: ReactNode;
 };
 
 const KeyListener = ({
@@ -92,12 +88,14 @@ const KeyListener = ({
 
     if (
       currentActions.filter((action) => action == move).length == 0 &&
-      handlers![move]
+      handlers[move]
     ) {
       setCurrentActions((actions: Moves[]): Moves[] => {
-        return [move!, ...actions];
+        return [move, ...actions];
       });
-      handlers![move]!();
+
+      const handler = handlers[move];
+      if (handler) handler();
     }
   };
 
