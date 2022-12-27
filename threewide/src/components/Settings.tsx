@@ -9,7 +9,6 @@ export type SettingsProperties = {
 };
 
 export type KeySettings = {
-  _doc?: any; //hack cause the types don't inherite properly
   moveLeft: string;
   moveRight: string;
   rotate90: string;

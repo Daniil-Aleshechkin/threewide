@@ -41,7 +41,7 @@ const HoldPiece = ({
         tileDimensions.height
       );
     }
-  }, [pieceType, rotation]);
+  }, [pieceType, rotation, tileDimensions.width, tileDimensions.height]);
 
   return (
     <div className="relative z-10">

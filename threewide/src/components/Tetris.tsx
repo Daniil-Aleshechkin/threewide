@@ -3,21 +3,19 @@ import PieceQueue from "./PieceQueue";
 import HoldPiece from "./HoldPiece";
 import { getTileLocationsFromPieceAndRotations } from "@utils/tetris/PieceRotations";
 import KeyListener from "./KeyListener";
-import {
-  KickTable,
-  getTableFromPieceAndRotation,
-} from "@utils/tetris/PieceKickTables";
-import {
+import { getTableFromPieceAndRotation } from "@utils/tetris/PieceKickTables";
+import type {
   BoardState,
   PieceType,
   Points,
   Rotation,
   TetrisPiece,
 } from "../types/tetris";
-import { useState, useEffect, useRef, ReactNode } from "react";
+import { useState, useEffect, useRef } from "react";
+import type { ReactNode } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCog } from "@fortawesome/free-solid-svg-icons";
-import { Settings } from "./Settings";
+import type { Settings } from "./Settings";
 import EndGame from "./EndGame";
 import BoardPiece from "./BoardPiece";
 
@@ -41,7 +39,7 @@ const useDebounce = (
         clearTimeout(timer);
       }
     };
-  }, [val, cancel, setCancel]);
+  }, [val, cancel, setCancel, dasTime]);
 
   return debounceVal;
 };
@@ -208,7 +206,7 @@ const Tetris = ({
   }
 
   useEffect(() => {
-    setQueue(fillQueue(queue));
+    setQueue((q) => fillQueue(q));
   }, []);
 
   function fillQueue(queue: PieceType[]): PieceType[] {
@@ -865,7 +863,7 @@ const Tetris = ({
         drawCurrentPiece(context);
       }
     }
-  }, [drawCurrentPiece]);
+  }, [drawCurrentPiece, drawBoard, drawShadowPiece]);
 
   return (
     <KeyListener
