@@ -1,5 +1,6 @@
-import { Settings } from "@components/Settings";
-import mongoose, { ObjectId } from "mongoose";
+import type { Settings } from "@components/Settings";
+import mongoose from "mongoose";
+import type { ObjectId } from "mongoose";
 
 export interface UserDocument
   extends mongoose.Document<ObjectId>,
