@@ -76,7 +76,7 @@ const Login: NextPage = () => {
 
           <button
             className="mt-10 w-full bg-black p-1 text-xl text-white"
-            onClick={(e) => signInUser()}
+            onClick={() => signInUser()}
           >
             START
           </button>

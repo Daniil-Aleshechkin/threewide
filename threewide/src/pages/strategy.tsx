@@ -1,20 +1,17 @@
-import { GetServerSideProps, GetServerSidePropsContext } from "next";
-import { MouseEvent, useState } from "react";
+import type { GetServerSideProps, GetServerSidePropsContext } from "next";
+import { useState } from "react";
+import type { MouseEvent } from "react";
 import Head from "next/head";
-
 import { trpc } from "../utils/trpc";
-import { PieceType } from "src/types/tetris";
 import { getServerAuthSession } from "src/server/common/get-server-auth-session";
-import { Session, User } from "next-auth";
+import type { User } from "next-auth";
 import { useRouter } from "next/router";
-import { Game, Goal } from "src/models/game_description.model";
+import type { Game } from "src/models/game_description.model";
 import TetrisGame from "@components/Game";
-import { useSession } from "next-auth/react";
-import { UserGame } from "src/server/trpc/router/gameDescription";
+import type { UserGame } from "src/server/trpc/router/gameDescription";
 import Header from "@components/Header";
 import { dom } from "@fortawesome/fontawesome-svg-core";
-import { Settings } from "@components/Settings";
-import { userAgent } from "next/server";
+import type { Settings } from "@components/Settings";
 
 type ActiveGame = {
   game: Game;
@@ -33,7 +30,7 @@ const Strategy = (user: User) => {
 
   const gameDescriptions = trpc.gameDescription.getGames.useQuery({
     name: stratName,
-    userId: user.name!,
+    userId: user.name ?? null,
   });
 
   const defaultSettings: Settings = {
@@ -75,10 +72,10 @@ const Strategy = (user: User) => {
   const userGameResult = trpc.userGameResult.createUserGameResult.useMutation();
 
   const updateGameWith = (index: number) => {
-    const game = gameDescriptions?.data?.games![index];
-    if (!game) {
-      return;
-    }
+    const games = gameDescriptions?.data?.games;
+    if (!games) return;
+    const game = games[index];
+    if (!game) return;
 
     const gameCopy: Game = {
       startingBoardState: game.startingBoardState,
@@ -108,8 +105,10 @@ const Strategy = (user: User) => {
     if (!gameDescriptions.data || !activeGame || !gameDescriptions.data.games)
       return;
 
+    if (!user.name) return;
+
     userGameResult.mutate({
-      userId: user.name!,
+      userId: user.name,
       gameId: activeGame.game.gameId,
       isCompleted: true,
     });
@@ -128,10 +127,12 @@ const Strategy = (user: User) => {
     if (!gameDescriptions.data || !activeGame || !gameDescriptions.data.games)
       return;
 
+    if (!user.name) return;
+
     if (!activeGame.isCompleted)
       userGameResult.mutate({
-        userId: user.name!,
-        gameId: activeGame.game.gameId!,
+        userId: user.name,
+        gameId: activeGame.game.gameId,
         isCompleted: false,
       });
 
@@ -151,7 +152,7 @@ const Strategy = (user: User) => {
     if (!gameDescriptions.data || !gameDescriptions.data.games) return;
 
     const randomIndex = Math.floor(
-      gameDescriptions.data.games.length! * Math.random()
+      gameDescriptions.data.games.length * Math.random()
     );
 
     updateGameWith(randomIndex);

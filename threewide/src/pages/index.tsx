@@ -1,13 +1,14 @@
-import { GetServerSideProps, GetServerSidePropsContext } from "next";
+import type { GetServerSideProps, GetServerSidePropsContext } from "next";
 import { useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { trpc } from "../utils/trpc";
 import Tetris from "@components/Tetris";
-import { BoardState, PieceType } from "src/types/tetris";
+import type { BoardState, PieceType } from "src/types/tetris";
 import { getServerAuthSession } from "src/server/common/get-server-auth-session";
 import type { User } from "next-auth";
-import SettingsPage, { Settings } from "@components/Settings";
+import SettingsPage from "@components/Settings";
+import type { Settings } from "@components/Settings";
 import { dom } from "@fortawesome/fontawesome-svg-core";
 import Header from "@components/Header";
 

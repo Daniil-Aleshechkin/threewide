@@ -207,7 +207,7 @@ const Tetris = ({
 
   useEffect(() => {
     setQueue((q) => fillQueue(q));
-  }, []);
+  }, [fillQueue]);
 
   function fillQueue(queue: PieceType[]): PieceType[] {
     if (generatePieceQueue && queue.length < 14) {

@@ -15,9 +15,11 @@ export interface UserGame extends Game, UserGameResult {
 
 export const gameDescriptionRouter = router({
   getGames: publicProcedure
-    .input(z.object({ name: z.string(), userId: z.string() }))
+    .input(z.object({ name: z.string(), userId: z.string().nullable() }))
     .query(async ({ input }) => {
       try {
+        if (!input.userId) return { error: "User not logged in" };
+
         await connectMongo();
 
         const strategy = await StrategyModel.findOne({
@@ -36,7 +38,7 @@ export const gameDescriptionRouter = router({
           const userGameResult: UserGameResultDocument | null =
             await UserGameResultModel.findOne({
               userId: {
-                $eq: new Types.ObjectId(input.userId),
+                $eq: new Types.ObjectId(input.userId ?? ""),
               },
               gameId: {
                 $eq: game._id,
