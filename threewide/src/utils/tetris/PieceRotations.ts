@@ -318,22 +318,28 @@ function getTileLocationsFromPieceAndRotations(
   pieceType: PieceType,
   rotation: Rotation
 ): [number, number][] {
+  let piece: [number, number][] | undefined;
+
   switch (pieceType) {
     case "T":
-      return TPIECE[rotation]!;
+      piece = TPIECE[rotation];
     case "J":
-      return JPIECE[rotation]!;
+      piece = JPIECE[rotation];
     case "I":
-      return IPIECE[rotation]!;
+      piece = IPIECE[rotation];
     case "Z":
-      return ZPIECE[rotation]!;
+      piece = ZPIECE[rotation];
     case "S":
-      return SPIECE[rotation]!;
+      piece = SPIECE[rotation];
     case "L":
-      return LPIECE[rotation]!;
+      piece = LPIECE[rotation];
     default:
-      return OPIECE;
+      piece = OPIECE;
   }
+
+  if (!piece) return OPIECE;
+
+  return piece;
 }
 
 export { getTileLocationsFromPieceAndRotations };

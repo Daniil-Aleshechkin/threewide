@@ -1,9 +1,8 @@
 import { Types } from "mongoose";
 import UserGameResultModel from "src/models/user_game_result.model";
 import { z } from "zod";
-import StrategyModel from "../../../models/stategy.model";
 import connectMongo from "../../../utils/mongoose";
-import { router, publicProcedure, protectedProcedure } from "../trpc";
+import { router, publicProcedure } from "../trpc";
 
 export const userGameResultRouter = router({
   createUserGameResult: publicProcedure

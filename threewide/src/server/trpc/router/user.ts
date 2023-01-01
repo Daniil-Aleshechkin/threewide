@@ -1,10 +1,9 @@
-import { Settings } from "@components/Settings";
-import { isError } from "@tanstack/react-query";
+import type { Settings } from "@components/Settings";
 import { Types } from "mongoose";
 import UserModel from "src/models/user.model";
 import { z } from "zod";
 import connectMongo from "../../../utils/mongoose";
-import { router, publicProcedure, protectedProcedure } from "../trpc";
+import { router, publicProcedure } from "../trpc";
 
 const defaultUserSettings: Settings = {
   keySettings: {

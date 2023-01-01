@@ -1,5 +1,3 @@
-import { Goal } from "src/models/game_description.model";
-
 export type Rotation = 0 | 1 | 2 | 3;
 
 export type PieceType = "T" | "S" | "Z" | "L" | "O" | "J" | "I" | "";

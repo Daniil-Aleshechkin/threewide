@@ -1,4 +1,4 @@
-import { PieceType, Rotation } from "../../types/tetris";
+import type { PieceType, Rotation } from "../../types/tetris";
 
 const defaultKicktable: { [id: number]: { [id: number]: [number, number][] } } =
   {
@@ -178,11 +178,13 @@ function getTableFromPieceAndRotation(
   rotation: Rotation
 ): KickTable {
   if (rotation == 2) {
-    return default180KickTable[currentRotation]!;
+    return default180KickTable[currentRotation] as KickTable;
   } else if (pieceType == "I") {
-    return iKickTable[currentRotation]![rotation]!;
+    return (iKickTable[currentRotation] as KickTable[])[rotation] as KickTable;
   } else {
-    return defaultKicktable[currentRotation]![rotation]!;
+    return (defaultKicktable[currentRotation] as KickTable[])[
+      rotation
+    ] as KickTable;
   }
 }
 

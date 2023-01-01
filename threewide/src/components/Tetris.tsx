@@ -11,7 +11,7 @@ import type {
   Rotation,
   TetrisPiece,
 } from "../types/tetris";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import type { ReactNode } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCog } from "@fortawesome/free-solid-svg-icons";
@@ -205,11 +205,7 @@ const Tetris = ({
     return [startingXLocation, startingYLocation];
   }
 
-  useEffect(() => {
-    setQueue((q) => fillQueue(q));
-  }, [fillQueue]);
-
-  function fillQueue(queue: PieceType[]): PieceType[] {
+  const fillQueue = useCallback((queue: PieceType[]): PieceType[] => {
     if (generatePieceQueue && queue.length < 14) {
       let newQueue = [...queue];
 
@@ -238,7 +234,11 @@ const Tetris = ({
     } else {
       return queue;
     }
-  }
+  }, []);
+
+  useEffect(() => {
+    setQueue((q) => fillQueue(q));
+  }, [fillQueue]);
 
   function generateBag(): PieceType[] {
     const pieces: PieceType[] = ["T", "S", "J", "L", "O", "Z", "I"];

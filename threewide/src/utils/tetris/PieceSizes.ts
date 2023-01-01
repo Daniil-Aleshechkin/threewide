@@ -1,4 +1,4 @@
-import { PieceType } from "../../types/tetris";
+import type { PieceType } from "../../types/tetris";
 
 const getPieceSizesFromPieceType = (pieceType: PieceType) => {
   switch (pieceType) {

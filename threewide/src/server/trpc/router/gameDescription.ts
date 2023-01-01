@@ -1,10 +1,12 @@
-import GameDescriptionModel, { Game } from "src/models/game_description.model";
+import GameDescriptionModel from "src/models/game_description.model";
+import type { Game } from "src/models/game_description.model";
 import { z } from "zod";
 import StrategyModel from "../../../models/stategy.model";
 import connectMongo from "../../../utils/mongoose";
 import { Types } from "mongoose";
-import { router, publicProcedure, protectedProcedure } from "../trpc";
-import UserGameResultModel, {
+import { router, publicProcedure } from "../trpc";
+import UserGameResultModel from "src/models/user_game_result.model";
+import type {
   UserGameResult,
   UserGameResultDocument,
 } from "src/models/user_game_result.model";
