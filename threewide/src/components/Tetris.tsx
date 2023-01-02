@@ -124,6 +124,8 @@ const Tetris = ({
     } else if (deBouncedDAS.direction == "right") {
       movePieceRight(10);
     }
+    // Disable because movePieceLeft and movePieceRight are used as functions and we do not want them to trigger the effect since we are waiting for the debouce effect to pass
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deBouncedDAS]);
 
   const isLeftDas = currentDAS.direction == "left" && currentDAS.enabled;
@@ -227,7 +229,6 @@ const Tetris = ({
     fillQueueWithBoard(queue, board);
 
   useEffect(() => {
-    console.log("Filling queue");
     setQueue((q) => fillQueueWithDefaultBoard(q));
   }, [fillQueueWithDefaultBoard]);
 
@@ -385,7 +386,7 @@ const Tetris = ({
     );
 
     if (isSoftDroping) {
-      newLocation = getPathFindPiece([0, 1], [newLocation[0], 20], newLocation);
+      newLocation = getPathFindPiece([0, 1], [newLocation[0], 23], newLocation);
     }
 
     if (newLocation != currentPieceRef.current.pieceLocation) {
