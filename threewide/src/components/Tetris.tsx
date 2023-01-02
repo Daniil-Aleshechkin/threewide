@@ -4,6 +4,10 @@ import HoldPiece from "./HoldPiece";
 import { getTileLocationsFromPieceAndRotations } from "@utils/tetris/PieceRotations";
 import KeyListener from "./KeyListener";
 import { getTableFromPieceAndRotation } from "@utils/tetris/PieceKickTables";
+import {
+  getPieceStartingLocationFromPieceTypeWithState,
+  locationOutOfBound,
+} from "@utils/tetris/PieceLocations";
 import type {
   BoardState,
   PieceType,
@@ -125,6 +129,19 @@ const Tetris = ({
   const isLeftDas = currentDAS.direction == "left" && currentDAS.enabled;
   const isRightDas = currentDAS.direction == "right" && currentDAS.enabled;
 
+  const getPieceStartingLocationFromPieceType = useCallback(
+    (pieceType: PieceType, newBoard: BoardState): [number, number] => {
+      return getPieceStartingLocationFromPieceTypeWithState(
+        pieceType,
+        newBoard,
+        isLeftDas,
+        isRightDas,
+        isSoftDroping
+      );
+    },
+    [isLeftDas, isRightDas, isSoftDroping]
+  );
+
   const [currentPiece, setCurrentPiece] = useState<TetrisPiece>({
     pieceType:
       startingPieceQueue.length == 0
@@ -163,82 +180,56 @@ const Tetris = ({
   const [board, setBoard] = useState<BoardState>(copyBoard(startingBoardState));
   const [queue, setQueue] = useState<PieceType[]>(startingPieceQueue.slice(1));
 
-  function getPieceStartingLocationFromPieceType(
-    pieceType: PieceType,
-    newBoard: BoardState
-  ): [number, number] {
-    let startingYLocation = -3;
+  const fillQueueWithBoard = useCallback(
+    (queue: PieceType[], board: BoardState): PieceType[] => {
+      if (generatePieceQueue && queue.length < 14) {
+        let newQueue = [...queue];
 
-    let startingXLocation = 3;
+        newQueue = newQueue.concat(generateBag());
+        if (queue.length === 0) {
+          const firstPiece = newQueue[0] as PieceType;
+          const newPiece: TetrisPiece = {
+            pieceType: firstPiece,
+            pieceLocation: getPieceStartingLocationFromPieceTypeWithState(
+              firstPiece,
+              board,
+              false,
+              false,
+              false
+            ),
+            pieceRotation: 0,
+            isSlamKicked: false,
+          };
 
-    if (pieceType == "O") startingXLocation = 4;
+          setCurrentPiece(newPiece);
+          currentPieceRef.current = newPiece;
 
-    if (isLeftDas ?? false) {
-      startingXLocation = getPathFindPieceWithPieceType(
-        [-1, 0],
-        [-4, startingYLocation],
-        [startingXLocation, startingYLocation],
-        pieceType,
-        newBoard
-      )[0];
-    } else if (isRightDas ?? false) {
-      startingXLocation = getPathFindPieceWithPieceType(
-        [1, 0],
-        [14, startingYLocation],
-        [startingXLocation, startingYLocation],
-        pieceType,
-        newBoard
-      )[0];
-    }
+          newQueue = newQueue.slice(1);
+        }
 
-    if (isSoftDroping) {
-      startingYLocation =
-        getPathFindPieceWithPieceType(
-          [0, 1],
-          [startingXLocation, 23],
-          [startingXLocation, 0],
-          pieceType,
-          newBoard
-        )[1] - 3;
-    }
+        newQueue = newQueue.concat(generateBag());
 
-    return [startingXLocation, startingYLocation];
-  }
-
-  const fillQueue = useCallback((queue: PieceType[]): PieceType[] => {
-    if (generatePieceQueue && queue.length < 14) {
-      let newQueue = [...queue];
-
-      newQueue = newQueue.concat(generateBag());
-      if (queue.length === 0) {
-        const firstPiece = newQueue[0] as PieceType;
-        const newPiece: TetrisPiece = {
-          pieceType: firstPiece,
-          pieceLocation: getPieceStartingLocationFromPieceType(
-            firstPiece,
-            board
-          ),
-          pieceRotation: 0,
-          isSlamKicked: false,
-        };
-
-        setCurrentPiece(newPiece);
-        currentPieceRef.current = newPiece;
-
-        newQueue = newQueue.slice(1);
+        return newQueue;
+      } else {
+        return queue;
       }
+    },
+    []
+  );
 
-      newQueue = newQueue.concat(generateBag());
+  const fillQueueWithDefaultBoard = useCallback(
+    (queue: PieceType[]): PieceType[] =>
+      fillQueueWithBoard(queue, startingBoardState),
+    [fillQueueWithBoard]
+  );
 
-      return newQueue;
-    } else {
-      return queue;
-    }
-  }, []);
+  const fillQueue = (queue: PieceType[]): PieceType[] =>
+    fillQueueWithBoard(queue, board);
 
   useEffect(() => {
+    console.log("Filling queue");
     setQueue((q) => fillQueue(q));
-  }, [fillQueue]);
+  }, [fillQueueWithDefaultBoard]);
 
   function generateBag(): PieceType[] {
     const pieces: PieceType[] = ["T", "S", "J", "L", "O", "Z", "I"];
@@ -484,33 +475,6 @@ const Tetris = ({
     return newLocation;
   }
 
-  function getPathFindPieceWithPieceType(
-    incrementor: [number, number],
-    desiredLocation: [number, number],
-    startingLocation: [number, number],
-    pieceType: PieceType,
-    newBoard: BoardState
-  ): [number, number] {
-    let newLocation = startingLocation;
-
-    while (
-      isPieceMoveValidWithPieceType(
-        [newLocation[0] + incrementor[0], newLocation[1] + incrementor[1]],
-        pieceType,
-        newBoard
-      ) &&
-      (desiredLocation[0] != newLocation[0] ||
-        desiredLocation[1] != newLocation[1])
-    ) {
-      newLocation = [
-        newLocation[0] + incrementor[0],
-        newLocation[1] + incrementor[1],
-      ];
-    }
-
-    return newLocation;
-  }
-
   function isPieceMoveValid(location: [number, number]): boolean {
     const tileLocations: [number, number][] =
       getTileLocationsFromPieceAndRotations(
@@ -581,38 +545,6 @@ const Tetris = ({
       }
     }
     return true;
-  }
-
-  function isPieceMoveValidWithPieceType(
-    location: [number, number],
-    pieceType: PieceType,
-    newBoard: BoardState
-  ): boolean {
-    const tileLocations: [number, number][] =
-      getTileLocationsFromPieceAndRotations(pieceType, 0);
-    for (const tileLocation of tileLocations) {
-      if (
-        locationOutOfBound([
-          tileLocation[0] + location[0],
-          tileLocation[1] + location[1] + 3,
-        ]) ||
-        (newBoard[location[1] + tileLocation[1] + 3] as unknown as PieceType[])[
-          location[0] + tileLocation[0]
-        ] !== ""
-      ) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  function locationOutOfBound(location: [number, number]): boolean {
-    return (
-      location[0] < 0 ||
-      location[1] < 0 ||
-      location[0] >= 10 ||
-      location[1] >= 23
-    );
   }
 
   function onHoldPiece(): void {

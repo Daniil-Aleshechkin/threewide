@@ -323,20 +323,25 @@ function getTileLocationsFromPieceAndRotations(
   switch (pieceType) {
     case "T":
       piece = TPIECE[rotation];
+      break;
     case "J":
       piece = JPIECE[rotation];
+      break;
     case "I":
       piece = IPIECE[rotation];
+      break;
     case "Z":
       piece = ZPIECE[rotation];
+      break;
     case "S":
       piece = SPIECE[rotation];
+      break;
     case "L":
       piece = LPIECE[rotation];
+      break;
     default:
       piece = OPIECE;
   }
-
   if (!piece) return OPIECE;
 
   return piece;
