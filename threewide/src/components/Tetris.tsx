@@ -214,13 +214,13 @@ const Tetris = ({
         return queue;
       }
     },
-    []
+    [generatePieceQueue]
   );
 
   const fillQueueWithDefaultBoard = useCallback(
     (queue: PieceType[]): PieceType[] =>
       fillQueueWithBoard(queue, startingBoardState),
-    [fillQueueWithBoard]
+    [fillQueueWithBoard, startingBoardState]
   );
 
   const fillQueue = (queue: PieceType[]): PieceType[] =>
@@ -228,7 +228,7 @@ const Tetris = ({
 
   useEffect(() => {
     console.log("Filling queue");
-    setQueue((q) => fillQueue(q));
+    setQueue((q) => fillQueueWithDefaultBoard(q));
   }, [fillQueueWithDefaultBoard]);
 
   function generateBag(): PieceType[] {
