@@ -1,4 +1,4 @@
-import { BoardState, PieceType } from "src/types/tetris";
+import type { BoardState, PieceType } from "src/types/tetris";
 import { getTileLocationsFromPieceAndRotations } from "./PieceRotations";
 
 const getPieceStartingLocationFromPieceTypeWithState = (

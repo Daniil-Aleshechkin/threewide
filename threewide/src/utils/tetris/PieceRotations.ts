@@ -1,4 +1,4 @@
-import { PieceType, Rotation } from "../../types/tetris";
+import type { PieceType, Rotation } from "../../types/tetris";
 
 //I PIECE
 
