@@ -12,6 +12,8 @@ type KeyListenerEventHandlers = {
   onDasDisable: (direction: Direction) => void;
   onMovePieceLeftHandler: () => void;
   onMovePieceRightHandler: () => void;
+  onDasPieceLeftHandler: () => void;
+  onDasPieceRightHandler: () => void;
   onHardDropHandler: () => void;
   onHoldPieceHandler: () => void;
   onSoftDropHandler: () => void;
@@ -29,6 +31,8 @@ const KeyListener = ({
   onDasDisable,
   onMovePieceLeftHandler,
   onMovePieceRightHandler,
+  onDasPieceLeftHandler,
+  onDasPieceRightHandler,
   onHardDropHandler,
   onSoftDropHandler,
   onHoldPieceHandler,
@@ -70,7 +74,18 @@ const KeyListener = ({
       onSoftDropDisable();
     }
 
-    setCurrentActions((actions) => {
+    switch (move) {
+      case "moveLeft":
+        if (inputBuffer.filter((action) => action == "moveRight").length >= 1)
+          onDasPieceRightHandler();
+        break;
+      case "moveRight":
+        if (inputBuffer.filter((action) => action == "moveLeft").length >= 1)
+          onDasPieceLeftHandler();
+        break;
+    }
+
+    setInputBuffer((actions) => {
       return [...actions.filter((action) => action != move)];
     });
   };
@@ -87,10 +102,10 @@ const KeyListener = ({
     if (move === undefined) return;
 
     if (
-      currentActions.filter((action) => action == move).length == 0 &&
+      inputBuffer.filter((action) => action == move).length == 0 &&
       handlers[move]
     ) {
-      setCurrentActions((actions: Moves[]): Moves[] => {
+      setInputBuffer((actions: Moves[]): Moves[] => {
         return [move, ...actions];
       });
 
@@ -99,7 +114,7 @@ const KeyListener = ({
     }
   };
 
-  const [currentActions, setCurrentActions] = useState<Moves[]>([]);
+  const [inputBuffer, setInputBuffer] = useState<Moves[]>([]);
 
   const listener = useRef<HTMLDivElement>(null);
 

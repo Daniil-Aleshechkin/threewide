@@ -131,6 +131,14 @@ const Tetris = ({
   const isLeftDas = currentDAS.direction == "left" && currentDAS.enabled;
   const isRightDas = currentDAS.direction == "right" && currentDAS.enabled;
 
+  const onDasPieceRightHandler = () => {
+    if (currentDAS.enabled) movePieceRight(10);
+  };
+
+  const onDasPieceLeftHandler = () => {
+    if (currentDAS.enabled) movePieceLeft(10);
+  };
+
   const getPieceStartingLocationFromPieceType = useCallback(
     (pieceType: PieceType, newBoard: BoardState): [number, number] => {
       return getPieceStartingLocationFromPieceTypeWithState(
@@ -807,6 +815,8 @@ const Tetris = ({
       onDasDisable={onDasDisable}
       onMovePieceLeftHandler={onMovePieceLeftHandler}
       onMovePieceRightHandler={onMovePieceRightHandler}
+      onDasPieceRightHandler={onDasPieceRightHandler}
+      onDasPieceLeftHandler={onDasPieceLeftHandler}
       onHardDropHandler={onHandlePlacePiece}
       onRotatePieceHandler={onHandleRotatePiece}
       onResetHandler={onResetHandler}
