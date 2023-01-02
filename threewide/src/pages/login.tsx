@@ -1,4 +1,8 @@
-import { faLock, faUser } from "@fortawesome/free-solid-svg-icons";
+import {
+  faLock,
+  faUser,
+  faCircleNotch,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import type { NextPage } from "next";
 import { signIn } from "next-auth/react";
@@ -12,10 +16,12 @@ config.autoAddCss = false;
 const Login: NextPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [isSigningIn, setIsSigningIn] = useState(false);
   const router = useRouter();
   const [errorMessage, setErrorMessage] = useState("");
 
   const signInUser = async () => {
+    setIsSigningIn(true);
     const signInOptions = { redirect: false, username, password };
     const res = await signIn("credentials", signInOptions);
     if (res?.error) {
@@ -75,10 +81,19 @@ const Login: NextPage = () => {
           </div>
 
           <button
-            className="mt-10 w-full bg-black p-1 text-xl text-white"
+            className="mt-10 w-full border-2 border-black bg-black p-1 text-xl text-white hover:cursor-pointer hover:bg-white hover:text-black"
             onClick={() => signInUser()}
           >
-            START
+            {!isSigningIn ? (
+              "START"
+            ) : (
+              <FontAwesomeIcon
+                className="mr-3 ml-3"
+                spin={true}
+                icon={faCircleNotch}
+                size="lg"
+              />
+            )}
           </button>
           <div>{errorMessage}</div>
         </div>
