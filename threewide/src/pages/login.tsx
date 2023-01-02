@@ -25,6 +25,7 @@ const Login: NextPage = () => {
     const signInOptions = { redirect: false, username, password };
     const res = await signIn("credentials", signInOptions);
     if (res?.error) {
+      setIsSigningIn(false);
       setErrorMessage(res.error);
     } else {
       return await router.push("/");
