@@ -8,9 +8,12 @@ import connectMongo from "@utils/mongoose";
 
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    session({ session }) {
+    session({ session, token, user }) {
       return session;
     },
+    jwt({token, account, profile}) {
+
+    }
   },
   providers: [
     CredentialsProvider({

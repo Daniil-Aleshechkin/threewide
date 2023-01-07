@@ -11,6 +11,7 @@ export interface ThreeWideUser {
   password: string;
   userId: string;
   settings: Settings;
+  isAdmin: boolean;
 }
 
 const userSchema = new mongoose.Schema({
@@ -32,6 +33,7 @@ const userSchema = new mongoose.Schema({
     },
     dasAmount: Number,
   },
+  isAdmin: Boolean
 });
 
 const UserModel: mongoose.Model<UserDocument> =
