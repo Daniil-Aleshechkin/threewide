@@ -4,61 +4,22 @@ import Head from "next/head";
 import Link from "next/link";
 import { trpc } from "../utils/trpc";
 import Tetris from "@components/Tetris";
-import type { BoardState, PieceType } from "src/types/tetris";
+import type { PieceType } from "src/types/tetris";
 import { getServerAuthSession } from "src/server/common/get-server-auth-session";
 import type { User } from "next-auth";
 import SettingsPage from "@components/Settings";
 import type { Settings } from "@components/Settings";
 import { dom } from "@fortawesome/fontawesome-svg-core";
 import Header from "@components/Header";
+import {
+  defaultUserSettings,
+  startingBoardState,
+} from "@utils/tetris/StartingStates";
 
 const Home = (user: User) => {
   const [search, setSearch] = useState<string>("");
 
   const stratagies = trpc.strategy.search.useQuery({ name: search });
-
-  const defaultUserSettings: Settings = {
-    keySettings: {
-      moveLeft: "ArrowLeft",
-      moveRight: "ArrowRight",
-      rotate180: "KeyQ",
-      rotate270: "KeyW",
-      rotate90: "ArrowUp",
-      holdPiece: "Tab",
-      hardDrop: "KeyD",
-      softDrop: "ArrowDown",
-      reset: "KeyR",
-      next: "KeyY",
-      previous: "KeyT",
-    },
-    dasAmount: 80,
-  };
-
-  const startingBoardState: BoardState = [
-    ["", "", "", "", "", "", "", "", "", ""],
-    ["", "", "", "", "", "", "", "", "", ""],
-    ["", "", "", "", "", "", "", "", "", ""],
-    ["", "", "", "", "", "", "", "", "", ""],
-    ["", "", "", "", "", "", "", "", "", ""],
-    ["", "", "", "", "", "", "", "", "", ""],
-    ["", "", "", "", "", "", "", "", "", ""],
-    ["", "", "", "", "", "", "", "", "", ""],
-    ["", "", "", "", "", "", "", "", "", ""],
-    ["", "", "", "", "", "", "", "", "", ""],
-    ["", "", "", "", "", "", "", "", "", ""],
-    ["", "", "", "", "", "", "", "", "", ""],
-    ["", "", "", "", "", "", "", "", "", ""],
-    ["", "", "", "", "", "", "", "", "", ""],
-    ["", "", "", "", "", "", "", "", "", ""],
-    ["", "", "", "", "", "", "", "", "", ""],
-    ["", "", "", "", "", "", "", "", "", ""],
-    ["", "", "", "", "", "", "", "", "", ""],
-    ["", "", "", "", "", "", "", "", "", ""],
-    ["", "", "", "", "", "", "", "", "", ""],
-    ["", "", "", "", "", "", "", "", "", ""],
-    ["", "", "", "", "", "", "", "", "", ""],
-    ["", "", "", "", "", "", "", "", "", ""],
-  ] as unknown as BoardState;
 
   const userSettings = trpc.user.getUserSettings.useQuery({
     userId: user.name,
@@ -100,7 +61,6 @@ const Home = (user: User) => {
     !userSettings.data.error &&
     !settings
   ) {
-    console.log(userSettings.data.settings);
     setSettings(userSettings.data.settings);
   }
 
