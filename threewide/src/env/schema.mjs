@@ -16,6 +16,7 @@ export const serverSchema = z.object({
     process.env.VERCEL ? z.string() : z.string().url()
   ),
   MONGODB_URI: z.string(),
+  ADMIN_ACCOUNTS: z.string(),
 });
 
 /**

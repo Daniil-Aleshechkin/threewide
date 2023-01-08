@@ -9,11 +9,29 @@ import connectMongo from "@utils/mongoose";
 export const authOptions: NextAuthOptions = {
   callbacks: {
     session({ session, token, user }) {
+      //Can't figure out how to change the types of the call back in next auth so I have this hack for now
+      //@ts-ignore next-line
+      session.isAdmin = token.isAdmin ?? false;
+
       return session;
     },
-    jwt({token, account, profile}) {
+    jwt({ token, user }) {
+      if (user) {
+        const admins = process.env.ADMIN_ACCOUNTS?.split(",");
 
-    }
+        if (!admins) return token;
+        if (
+          user.email &&
+          admins.filter(
+            (admin) => admin.toLowerCase() == user.email?.toLowerCase()
+          ).length == 1
+        ) {
+          token.isAdmin = true;
+          console.log("TOKEN AFTER CREATION", token);
+        }
+      }
+      return token;
+    },
   },
   providers: [
     CredentialsProvider({
