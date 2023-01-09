@@ -12,6 +12,7 @@ import type { UserGame } from "src/server/trpc/router/gameDescription";
 import Header from "@components/Header";
 import { dom } from "@fortawesome/fontawesome-svg-core";
 import type { Settings } from "@components/Settings";
+import { defaultUserSettings } from "@utils/tetris/StartingStates";
 
 type ActiveGame = {
   game: Game;
@@ -32,23 +33,6 @@ const Strategy = (user: User) => {
     name: stratName,
     userId: user.name ?? null,
   });
-
-  const defaultSettings: Settings = {
-    keySettings: {
-      moveLeft: "ArrowLeft",
-      moveRight: "ArrowRight",
-      rotate180: "KeyQ",
-      rotate270: "KeyW",
-      rotate90: "ArrowUp",
-      holdPiece: "Tab",
-      hardDrop: "KeyD",
-      softDrop: "ArrowDown",
-      reset: "KeyR",
-      next: "KeyY",
-      previous: "KeyT",
-    },
-    dasAmount: 80,
-  };
 
   const userSettings = trpc.user.getUserSettings.useQuery({
     userId: user.name,
@@ -194,7 +178,7 @@ const Strategy = (user: User) => {
             onGameLose={onGameLose}
             onGameWin={onGameWin}
             onOverlayToggle={onOverlayToggle}
-            settings={settings ?? defaultSettings}
+            settings={settings ?? defaultUserSettings}
             onSettingsUpdate={onSettingsUpdateHandler}
             onGameNext={activeGame?.onNextGameHandler}
             onGamePrevious={activeGame?.onPreviousGameHandler}

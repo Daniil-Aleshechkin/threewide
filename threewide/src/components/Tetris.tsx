@@ -86,6 +86,17 @@ type DAS = {
   enabled: boolean;
 };
 
+type ClearedRow = {
+  rowLocation: number;
+  row: PieceType[];
+};
+type MoveHistory = {
+  pieceType: PieceType;
+  pieceLocation: [number, number];
+  pieceRotation: Rotation;
+  clearedRows: ClearedRow[];
+};
+
 const Tetris = ({
   width,
   height,
@@ -102,6 +113,8 @@ const Tetris = ({
   isWin = false,
   children,
 }: TetrisProps) => {
+  const moveHistory = useRef<MoveHistory[]>([]);
+
   const [isSoftDroping, setIsSoftDroping] = useState<boolean>(false);
   const [currentDAS, setCurrentDAS] = useState<DAS>({
     direction: null,
@@ -628,15 +641,27 @@ const Tetris = ({
     }
 
     const newBoard: PieceType[][] = [];
+    const clearedRows: ClearedRow[] = [];
     let clearedLines = 0;
     for (let row = 0; row < 23; row++) {
       if (removedYLocations.has(row)) {
         clearedLines += 1;
+        clearedRows.push({
+          rowLocation: row,
+          row: [...(board[row] as PieceType)] as PieceType[],
+        });
         newBoard.unshift([...EMPTY_ROW]);
       } else {
         newBoard.push([...(board[row] as PieceType)] as PieceType[]);
       }
     }
+
+    moveHistory.current.push({
+      pieceLocation: currentPieceRef.current.pieceLocation,
+      pieceType: currentPieceRef.current.pieceType,
+      pieceRotation: currentPieceRef.current.pieceRotation,
+      clearedRows,
+    });
 
     let points: Points | undefined;
 
@@ -792,6 +817,36 @@ const Tetris = ({
     boardState: board,
   });
 
+  const onUndoHandler = () => {
+    if (moveHistory.current.length == 0) return;
+
+    const previousMove = moveHistory.current[0];
+
+    moveHistory.current = moveHistory.current.splice(1);
+
+    const newBoard: PieceType[][] = copyBoard(
+      board
+    ) as unknown as PieceType[][];
+
+    if (previousMove?.clearedRows) {
+      newBoard.splice(previousMove.clearedRows.length);
+      previousMove.clearedRows.forEach((clearedRow) => {
+        newBoard.splice(clearedRow.rowLocation, 0, [...clearedRow.row]);
+      });
+    }
+
+    const moveLocations = getTileLocationsFromPieceAndRotations(
+      previousMove?.pieceType ?? "",
+      previousMove?.pieceRotation ?? 0
+    );
+
+    for (let i = 0; i < moveLocations.length; i++) {
+      newBoard[moveLocations[i]![1] + previousMove!.pieceLocation[1]]![
+        moveLocations[i]![0] + previousMove!.pieceLocation[0]
+      ] = "";
+    }
+  };
+
   useEffect(() => {
     const canvas = canvasRef.current;
 
@@ -822,6 +877,7 @@ const Tetris = ({
       onResetHandler={onResetHandler}
       onNextGame={onGameNext}
       onPreviousGame={onGamePrevious}
+      onUndo={onUndoHandler}
       settings={settings}
     >
       <div className="mt-20 flex">

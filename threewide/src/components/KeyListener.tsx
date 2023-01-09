@@ -21,6 +21,7 @@ type KeyListenerEventHandlers = {
   onResetHandler: () => void;
   onNextGame?: () => void;
   onPreviousGame?: () => void;
+  onUndo: () => void;
   settings: Settings;
   children: ReactNode;
 };
@@ -40,6 +41,7 @@ const KeyListener = ({
   onResetHandler,
   onNextGame,
   onPreviousGame,
+  onUndo,
   settings,
   children,
 }: KeyListenerEventHandlers) => {
@@ -61,6 +63,7 @@ const KeyListener = ({
     reset: onResetHandler,
     next: onNextGame,
     previous: onPreviousGame,
+    undo: onUndo,
   };
 
   const onKeyUpHandler: KeyboardEventHandler = (event) => {

@@ -17,6 +17,7 @@ export type KeySettings = {
   hardDrop: string;
   softDrop: string;
   holdPiece: string;
+  undo: string;
   reset: string;
   next: string;
   previous: string;

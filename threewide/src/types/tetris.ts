@@ -13,7 +13,8 @@ export type Moves =
   | "hardDrop"
   | "reset"
   | "previous"
-  | "next";
+  | "next"
+  | "undo";
 
 export type TetrisPiece = {
   pieceType: PieceType;

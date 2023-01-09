@@ -40,6 +40,7 @@ const defaultUserSettings: Settings = {
     reset: "KeyR",
     next: "KeyY",
     previous: "KeyT",
+    undo: "KeyE",
   },
   dasAmount: 80,
 };
