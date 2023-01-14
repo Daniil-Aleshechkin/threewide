@@ -212,6 +212,17 @@ const SettingsPage = ({
         </div>
 
         <div className="flex ">
+          <div className="mr-10">UNDO</div>
+          <KeySetting
+            onUpdateChangingSetting={onUpdateChangingSetting}
+            settingKey={settings.keySettings.undo}
+            settingType="undo"
+            changingSetting={changingSetting}
+            settings={settings}
+          />
+        </div>
+
+        <div className="flex ">
           <div className="mr-10">NEXT GAME</div>
           <KeySetting
             onUpdateChangingSetting={onUpdateChangingSetting}

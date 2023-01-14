@@ -27,13 +27,14 @@ const userSchema = new mongoose.Schema({
       rotate90: String,
       rotate180: String,
       rotate270: String,
+      undo: String,
       reset: String,
       next: String,
       previous: String,
     },
     dasAmount: Number,
   },
-  isAdmin: Boolean
+  isAdmin: Boolean,
 });
 
 const UserModel: mongoose.Model<UserDocument> =
