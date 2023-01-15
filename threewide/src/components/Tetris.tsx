@@ -95,6 +95,8 @@ type MoveHistory = {
   pieceLocation: [number, number];
   pieceRotation: Rotation;
   clearedRows: ClearedRow[];
+  isHold: boolean;
+  previouslyHeldPiece?: PieceType;
 };
 
 const Tetris = ({
@@ -189,7 +191,6 @@ const Tetris = ({
 
   const copyBoard = (board: BoardState): BoardState => {
     const newBoard: PieceType[][] = [];
-
     for (const row of board) {
       const newRow: PieceType[] = [];
       for (const item of row) {
@@ -302,6 +303,7 @@ const Tetris = ({
     };
     setCurrentPiece(newPiece);
     currentPieceRef.current = newPiece;
+    moveHistory.current = [];
 
     setQueue(filledQueue.slice(1));
     setGameOver(false);
@@ -607,6 +609,15 @@ const Tetris = ({
       currentPieceRef.current = newPiece;
       setCurrentPiece(newPiece);
     }
+
+    moveHistory.current.push({
+      clearedRows: [],
+      isHold: true,
+      previouslyHeldPiece: currentHeldPiece.pieceType,
+      pieceType: currentPiece.pieceType,
+      pieceLocation: [0, 0],
+      pieceRotation: 0,
+    });
   }
 
   const EMPTY_ROW: PieceType[] = ["", "", "", "", "", "", "", "", "", ""];
@@ -657,10 +668,11 @@ const Tetris = ({
     }
 
     moveHistory.current.push({
-      pieceLocation: currentPieceRef.current.pieceLocation,
+      pieceLocation: placePieceLocation,
       pieceType: currentPieceRef.current.pieceType,
       pieceRotation: currentPieceRef.current.pieceRotation,
       clearedRows,
+      isHold: false,
     });
 
     let points: Points | undefined;
@@ -819,18 +831,43 @@ const Tetris = ({
 
   const onUndoHandler = () => {
     if (moveHistory.current.length == 0) return;
+    const previousMove = moveHistory.current.pop();
+    if (!previousMove) return;
 
-    const previousMove = moveHistory.current[0];
+    if (previousMove?.isHold ?? false) {
+      if (previousMove.previouslyHeldPiece == "") {
+        let newQueue = [...queue];
+        newQueue.unshift(currentPieceRef.current.pieceType);
+        setQueue(newQueue);
+      }
 
-    moveHistory.current = moveHistory.current.splice(1);
+      const newCurrentPiece = {
+        pieceLocation: getPieceStartingLocationFromPieceType(
+          previousMove.pieceType,
+          board
+        ),
+        pieceType: previousMove.pieceType,
+        pieceRotation: 0 as Rotation,
+        isSlamKicked: false,
+      };
+
+      setCurrentHeldPiece({
+        pieceType: previousMove.previouslyHeldPiece as PieceType,
+        hasHeldPiece: false,
+      });
+      setCurrentPiece(newCurrentPiece);
+      currentPieceRef.current = newCurrentPiece;
+      return;
+    }
 
     const newBoard: PieceType[][] = copyBoard(
       board
     ) as unknown as PieceType[][];
 
-    if (previousMove?.clearedRows) {
-      newBoard.splice(previousMove.clearedRows.length);
+    if (previousMove.clearedRows?.length != 0 ?? false) {
+      previousMove.clearedRows.reverse();
       previousMove.clearedRows.forEach((clearedRow) => {
+        newBoard.shift();
         newBoard.splice(clearedRow.rowLocation, 0, [...clearedRow.row]);
       });
     }
@@ -839,12 +876,27 @@ const Tetris = ({
       previousMove?.pieceType ?? "",
       previousMove?.pieceRotation ?? 0
     );
-
     for (let i = 0; i < moveLocations.length; i++) {
-      newBoard[moveLocations[i]![1] + previousMove!.pieceLocation[1]]![
+      newBoard[moveLocations[i]![1] + previousMove!.pieceLocation[1] + 3]![
         moveLocations[i]![0] + previousMove!.pieceLocation[0]
       ] = "";
     }
+    let newQueue = [...queue];
+    newQueue.unshift(currentPieceRef.current.pieceType);
+    const newCurrentPiece = {
+      pieceLocation: getPieceStartingLocationFromPieceType(
+        previousMove.pieceType,
+        newBoard as unknown as BoardState
+      ),
+      pieceType: previousMove.pieceType,
+      pieceRotation: 0 as Rotation,
+      isSlamKicked: false,
+    };
+
+    setCurrentPiece(newCurrentPiece);
+    currentPieceRef.current = newCurrentPiece;
+    setBoard(newBoard as unknown as BoardState);
+    setQueue(newQueue);
   };
 
   useEffect(() => {
