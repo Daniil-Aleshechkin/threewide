@@ -286,26 +286,16 @@ const Tetris = ({
     if (onGameReset) onGameReset();
     setBoard(copyBoard(startingBoardState));
 
-    const filledQueue = fillQueue(startingPieceQueue);
+    let filledQueue = fillQueue(startingPieceQueue);
+    //console.log(filledQueue);
     setCurrentHeldPiece({
       pieceType: "",
       hasHeldPiece: false,
     });
-
-    const newPiece: TetrisPiece = {
-      pieceType: filledQueue[0] as PieceType,
-      pieceLocation: getPieceStartingLocationFromPieceType(
-        filledQueue[0] as PieceType,
-        startingBoardState
-      ),
-      pieceRotation: 0,
-      isSlamKicked: false,
-    };
-    setCurrentPiece(newPiece);
-    currentPieceRef.current = newPiece;
     moveHistory.current = [];
 
-    setQueue(filledQueue.slice(1));
+    filledQueue = filledQueue.splice(1);
+    setQueue(filledQueue);
     setGameOver(false);
   }
 
