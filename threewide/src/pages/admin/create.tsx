@@ -8,6 +8,7 @@ import Header from "@components/Header";
 import { config, dom } from "@fortawesome/fontawesome-svg-core";
 import { getServerAuthSession } from "src/server/common/get-server-auth-session";
 import Tetris from "@components/Tetris";
+import ColorSelector from "@components/ColorSelector";
 import type { User } from "next-auth";
 import type { PieceType } from "src/types/tetris";
 import type { Settings } from "@components/Settings";
@@ -18,52 +19,11 @@ import {
   startingBoardState,
 } from "@utils/tetris/StartingStates";
 import SettingsPage from "@components/Settings";
+import GameCreator from "@components/GameCreator";
 config.autoAddCss = false;
 
 const Create = (user: User) => {
-  const userSettings = trpc.user.getUserSettings.useQuery({
-    userId: user.name,
-  });
-
-  const startingBoardQueue: PieceType[] = [];
-
-  const saveUserSettings = trpc.user.saveUserSettings.useMutation();
-
-  const [settings, setSettings] = useState<Settings | undefined>();
-
-  const [showSettings, setShowSettings] = useState(false);
-
-  const onShowSettingsHandler = () => {
-    if (!userSettings.data || !userSettings.data.settings) {
-      return;
-    }
-
-    setShowSettings(true);
-  };
-
-  const onSettingCancelHandler = () => {
-    setShowSettings(false);
-  };
-
-  const onSettingsSaveHandler = (newSettings: Settings) => {
-    saveUserSettings.mutate({
-      userId: user.name,
-      settings: newSettings,
-    });
-
-    setSettings(newSettings);
-    setShowSettings(false);
-  };
-
-  if (
-    userSettings.data &&
-    userSettings?.data.settings != null &&
-    !userSettings.data.error &&
-    !settings
-  ) {
-    setSettings(userSettings.data.settings);
-  }
-
+  if (!user.name) return;
   return (
     <>
       <Head>
@@ -71,27 +31,8 @@ const Create = (user: User) => {
         <link rel="icon" href="/favicon.ico" />
         <style>{dom.css()}</style>
       </Head>
-      <div
-        className={
-          showSettings ? "fixed z-20 h-[100%] w-[100%] bg-black/70" : ""
-        }
-      ></div>
       <Header addHomeIcon={false} addLogOutIcon={false} />
-      <SettingsPage
-        showSettings={showSettings}
-        onSettingsSave={onSettingsSaveHandler}
-        onSettingCancel={onSettingCancelHandler}
-        currentSettings={settings ?? defaultUserSettings}
-      />
-      <Tetris
-        width={200}
-        height={400}
-        startingBoardState={startingBoardState}
-        startingPieceQueue={startingBoardQueue}
-        generatePieceQueue={true}
-        settings={settings ?? defaultUserSettings}
-        onShowSettings={onShowSettingsHandler}
-      />
+      <GameCreator userId={user.name} />
     </>
   );
 };

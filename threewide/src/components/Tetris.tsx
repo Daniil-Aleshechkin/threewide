@@ -10,6 +10,7 @@ import {
 } from "@utils/tetris/PieceLocations";
 import type {
   BoardState,
+  HeldPiece,
   PieceType,
   Points,
   Rotation,
@@ -53,6 +54,8 @@ type TetrisProps = {
   height: number;
   startingBoardState: BoardState;
   startingPieceQueue: PieceType[];
+  startingCurrentPiece?: TetrisPiece;
+  startingHoldPiece?: HeldPiece;
   generatePieceQueue: boolean;
   settings: Settings;
   onPointGained?: (
@@ -72,11 +75,15 @@ type TetrisProps = {
   onGameReset?: () => void;
   isWin?: boolean;
   children?: ReactNode;
+  onBoardClick?: (yMouse: number, xMouse: number) => void;
+  onTetrisStateChange?: TetrisStateListeners;
 };
 
-type HeldPiece = {
-  pieceType: PieceType;
-  hasHeldPiece: boolean;
+type TetrisStateListeners = {
+  holdPieceListener: (heldPiece: HeldPiece) => void;
+  queueListener: (queue: PieceType[]) => void;
+  boardListener: (board: BoardState) => void;
+  currentPieceListener: (currentPiece: TetrisPiece) => void;
 };
 
 type Direction = "left" | "right" | null;
@@ -104,6 +111,8 @@ const Tetris = ({
   height,
   startingBoardState,
   startingPieceQueue,
+  startingCurrentPiece,
+  startingHoldPiece,
   generatePieceQueue,
   settings,
   onPointGained,
@@ -113,6 +122,8 @@ const Tetris = ({
   onGamePrevious,
   onGameReset,
   isWin = false,
+  onBoardClick,
+  onTetrisStateChange,
   children,
 }: TetrisProps) => {
   const moveHistory = useRef<MoveHistory[]>([]);
@@ -167,27 +178,43 @@ const Tetris = ({
     [isLeftDas, isRightDas, isSoftDroping]
   );
 
-  const [currentPiece, setCurrentPiece] = useState<TetrisPiece>({
-    pieceType:
-      startingPieceQueue.length == 0
-        ? ""
-        : (startingPieceQueue[0] as PieceType),
-    pieceRotation: 0,
-    pieceLocation: getPieceStartingLocationFromPieceType(
-      startingPieceQueue[0] as PieceType,
-      startingBoardState
-    ),
-    isSlamKicked: false,
-  });
+  const [currentPiece, setCurrentPiece] = useState<TetrisPiece>(
+    startingCurrentPiece ?? {
+      pieceType:
+        startingPieceQueue.length == 0
+          ? ""
+          : (startingPieceQueue[0] as PieceType),
+      pieceRotation: 0,
+      pieceLocation: getPieceStartingLocationFromPieceType(
+        startingPieceQueue[0] as PieceType,
+        startingBoardState
+      ),
+      isSlamKicked: false,
+    }
+  );
+
+  useEffect(() => {
+    if (onTetrisStateChange)
+      onTetrisStateChange.currentPieceListener(currentPiece);
+    return;
+  }, [currentPiece]);
 
   const currentPieceRef = useRef<TetrisPiece>(currentPiece);
 
   const [combo, setCombo] = useState<number>(0);
 
-  const [currentHeldPiece, setCurrentHeldPiece] = useState<HeldPiece>({
-    pieceType: "",
-    hasHeldPiece: false,
-  });
+  const [currentHeldPiece, setCurrentHeldPiece] = useState<HeldPiece>(
+    startingHoldPiece ?? {
+      pieceType: "",
+      hasHeldPiece: false,
+    }
+  );
+
+  useEffect(() => {
+    if (onTetrisStateChange)
+      onTetrisStateChange.holdPieceListener(currentHeldPiece);
+    return;
+  }, [currentHeldPiece]);
 
   const copyBoard = (board: BoardState): BoardState => {
     const newBoard: PieceType[][] = [];
@@ -202,7 +229,18 @@ const Tetris = ({
   };
 
   const [board, setBoard] = useState<BoardState>(copyBoard(startingBoardState));
+
+  useEffect(() => {
+    if (onTetrisStateChange) onTetrisStateChange.boardListener(board);
+    return;
+  }, [board]);
+
   const [queue, setQueue] = useState<PieceType[]>(startingPieceQueue.slice(1));
+
+  useEffect(() => {
+    if (onTetrisStateChange) onTetrisStateChange.queueListener(queue);
+    return;
+  }, [queue]);
 
   const fillQueueWithBoard = useCallback(
     (queue: PieceType[], board: BoardState): PieceType[] => {
@@ -942,7 +980,16 @@ const Tetris = ({
               gameOver={gameOver}
             />
           </div>
-          <canvas width={200} height={460} ref={canvasRef}></canvas>
+          <canvas
+            onClick={(e) => {
+              if (onBoardClick) {
+                onBoardClick(e.clientY, e.clientX);
+              }
+            }}
+            width={200}
+            height={460}
+            ref={canvasRef}
+          ></canvas>
         </div>
         <div className="mt-10">
           <PieceQueue queue={queue} />

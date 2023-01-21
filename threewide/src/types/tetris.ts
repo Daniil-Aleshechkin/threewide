@@ -35,3 +35,8 @@ export interface Points {
 }
 
 export type BoardState = PieceType[23][10];
+
+export type HeldPiece = {
+  pieceType: PieceType;
+  hasHeldPiece: boolean;
+};
