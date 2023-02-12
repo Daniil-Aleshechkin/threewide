@@ -54,10 +54,11 @@ const ColorOption = ({
     <div
       key={`Color selector Option ${pieceType}`}
       onClick={() => onSelectColor(pieceType)}
+      style={{ backgroundColor: getColorFromBoardStateTile(pieceType) }}
       className={`m-2 h-3 w-3 ${getBackgroundColorFromBoardState(
         pieceType
-      )} p-3 hover:cursor-pointer ${
-        selectedPieceType == pieceType ? "border-2 border-black" : ""
+      )} border-2 p-3 hover:cursor-pointer ${
+        selectedPieceType == pieceType ? "border-black" : "border-white"
       }`}
     ></div>
   );

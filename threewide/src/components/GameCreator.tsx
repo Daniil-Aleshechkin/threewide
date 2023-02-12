@@ -78,13 +78,12 @@ const GameCreator = ({ userId }: GameCreatorProps) => {
   };
 
   const onSelectBoardHandler = (yMouse: number, xMouse: number) => {
-    let yLocation = Math.floor(yMouse / 400);
-    let xLocation = Math.floor(xMouse / 200);
+    let yLocation = Math.floor(yMouse / 20);
+    let xLocation = Math.floor(xMouse / 20);
     console.log(xLocation, yLocation, xMouse, yMouse);
-    //if (yLocation < 0 || yLocation >= 23 || xLocation < 0 || xLocation >= 10) {
-    yLocation = 10;
-    xLocation = 0;
-    //}
+    if (yLocation < 0 || yLocation >= 23 || xLocation < 0 || xLocation >= 10) {
+      return;
+    }
 
     let newBoard = copyBoard(boardState) as unknown as PieceType[][];
     (newBoard[yLocation] as unknown as PieceType[])[xLocation] =

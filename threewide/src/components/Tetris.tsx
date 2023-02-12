@@ -231,6 +231,11 @@ const Tetris = ({
   const [board, setBoard] = useState<BoardState>(copyBoard(startingBoardState));
 
   useEffect(() => {
+    setBoard(startingBoardState);
+    return;
+  }, [startingBoardState]);
+
+  useEffect(() => {
     if (onTetrisStateChange) onTetrisStateChange.boardListener(board);
     return;
   }, [board]);
@@ -982,8 +987,9 @@ const Tetris = ({
           </div>
           <canvas
             onClick={(e) => {
-              if (onBoardClick) {
-                onBoardClick(e.clientY, e.clientX);
+              if (onBoardClick && canvasRef.current) {
+                const { left, top } = canvasRef.current.getBoundingClientRect();
+                onBoardClick(e.clientY - top, e.clientX - left);
               }
             }}
             width={200}
