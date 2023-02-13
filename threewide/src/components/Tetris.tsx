@@ -16,7 +16,7 @@ import type {
   Rotation,
   TetrisPiece,
 } from "../types/tetris";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, RefObject } from "react";
 import type { ReactNode } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCog } from "@fortawesome/free-solid-svg-icons";
@@ -985,17 +985,7 @@ const Tetris = ({
               gameOver={gameOver}
             />
           </div>
-          <canvas
-            onClick={(e) => {
-              if (onBoardClick && canvasRef.current) {
-                const { left, top } = canvasRef.current.getBoundingClientRect();
-                onBoardClick(e.clientY - top, e.clientX - left);
-              }
-            }}
-            width={200}
-            height={460}
-            ref={canvasRef}
-          ></canvas>
+          <BoardCanvas canvasRef={canvasRef} onBoardClick={onBoardClick} />
         </div>
         <div className="mt-10">
           <PieceQueue queue={queue} />
@@ -1008,6 +998,50 @@ const Tetris = ({
         </div>
       </div>
     </KeyListener>
+  );
+};
+
+type BoardCanvasProps = {
+  canvasRef: RefObject<HTMLCanvasElement>;
+  onBoardClick?: (yMouse: number, xMouse: number) => void;
+};
+
+const BoardCanvas = ({ canvasRef, onBoardClick }: BoardCanvasProps) => {
+  const isDragRef = useRef(false);
+
+  const paint = (e: React.MouseEvent<HTMLCanvasElement, MouseEvent>) => {
+    if (onBoardClick && canvasRef.current) {
+      const { left, top } = canvasRef.current.getBoundingClientRect();
+      onBoardClick(e.clientY - top, e.clientX - left);
+    }
+  };
+
+  return (
+    <canvas
+      onClick={(e) => {
+        paint(e);
+      }}
+      width={200}
+      height={460}
+      ref={canvasRef}
+      onMouseMove={(e) => {
+        if (isDragRef.current) {
+          paint(e);
+        }
+      }}
+      onMouseDown={(e) => {
+        isDragRef.current = true;
+      }}
+      onMouseUp={(e) => {
+        isDragRef.current = false;
+      }}
+      onMouseEnter={(e) => {
+        isDragRef.current = e.buttons == 1;
+      }}
+      onMouseLeave={(e) => {
+        isDragRef.current = false;
+      }}
+    ></canvas>
   );
 };
 
