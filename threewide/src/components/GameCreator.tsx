@@ -159,10 +159,12 @@ const GameCreator = ({ userId }: GameCreatorProps) => {
           key={buildTetrisGameKey()}
           width={200}
           height={400}
-          startingBoardState={gameBoardState.current ?? boardState}
-          startingPieceQueue={gameQueueState.current ?? startingBoardQueue}
-          startingCurrentPiece={gameCurrentPieceState.current}
-          startingHoldPiece={gameCurrentHeldPiece.current}
+          startingBoardState={startingBoardState}
+          startingPieceQueue={startingBoardQueue}
+          overrideBoardState={gameBoardState}
+          overridePieceQueue={gameQueueState}
+          overrideCurrentPiece={gameCurrentPieceState}
+          overrideHoldPiece={gameCurrentHeldPiece}
           generatePieceQueue={true}
           settings={settings ?? defaultUserSettings}
           onShowSettings={onShowSettingsHandler}

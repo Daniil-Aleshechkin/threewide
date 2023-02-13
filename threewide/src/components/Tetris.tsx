@@ -16,7 +16,14 @@ import type {
   Rotation,
   TetrisPiece,
 } from "../types/tetris";
-import { useState, useEffect, useRef, useCallback, RefObject } from "react";
+import {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  RefObject,
+  MutableRefObject,
+} from "react";
 import type { ReactNode } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCog } from "@fortawesome/free-solid-svg-icons";
@@ -54,8 +61,10 @@ type TetrisProps = {
   height: number;
   startingBoardState: BoardState;
   startingPieceQueue: PieceType[];
-  startingCurrentPiece?: TetrisPiece;
-  startingHoldPiece?: HeldPiece;
+  overrideBoardState: MutableRefObject<string | undefined>;
+  overridePieceQueue: MutableRefObject<PieceType[] | undefined>;
+  overrideCurrentPiece: MutableRefObject<TetrisPiece | undefined>;
+  overrideHoldPiece: MutableRefObject<HeldPiece | undefined>;
   generatePieceQueue: boolean;
   settings: Settings;
   onPointGained?: (
@@ -111,8 +120,10 @@ const Tetris = ({
   height,
   startingBoardState,
   startingPieceQueue,
-  startingCurrentPiece,
-  startingHoldPiece,
+  overrideBoardState,
+  overridePieceQueue,
+  overrideCurrentPiece,
+  overrideHoldPiece,
   generatePieceQueue,
   settings,
   onPointGained,
@@ -178,20 +189,18 @@ const Tetris = ({
     [isLeftDas, isRightDas, isSoftDroping]
   );
 
-  const [currentPiece, setCurrentPiece] = useState<TetrisPiece>(
-    startingCurrentPiece ?? {
-      pieceType:
-        startingPieceQueue.length == 0
-          ? ""
-          : (startingPieceQueue[0] as PieceType),
-      pieceRotation: 0,
-      pieceLocation: getPieceStartingLocationFromPieceType(
-        startingPieceQueue[0] as PieceType,
-        startingBoardState
-      ),
-      isSlamKicked: false,
-    }
-  );
+  const [currentPiece, setCurrentPiece] = useState<TetrisPiece>({
+    pieceType:
+      startingPieceQueue.length == 0
+        ? ""
+        : (startingPieceQueue[0] as PieceType),
+    pieceRotation: 0,
+    pieceLocation: getPieceStartingLocationFromPieceType(
+      startingPieceQueue[0] as PieceType,
+      startingBoardState
+    ),
+    isSlamKicked: false,
+  });
 
   useEffect(() => {
     if (onTetrisStateChange)
@@ -203,18 +212,23 @@ const Tetris = ({
 
   const [combo, setCombo] = useState<number>(0);
 
-  const [currentHeldPiece, setCurrentHeldPiece] = useState<HeldPiece>(
-    startingHoldPiece ?? {
-      pieceType: "",
-      hasHeldPiece: false,
-    }
-  );
+  const [currentHeldPiece, setCurrentHeldPiece] = useState<HeldPiece>({
+    pieceType: "",
+    hasHeldPiece: false,
+  });
 
   useEffect(() => {
     if (onTetrisStateChange)
       onTetrisStateChange.holdPieceListener(currentHeldPiece);
     return;
   }, [currentHeldPiece]);
+
+  useEffect(() => {
+    if (overrideBoardState.current) {
+      setBoard(overrideBoardState.current);
+    }
+    return;
+  }, [overrideBoardState.current]);
 
   const copyBoard = (board: BoardState): BoardState => {
     const newBoard: PieceType[][] = [];
@@ -231,11 +245,7 @@ const Tetris = ({
   const [board, setBoard] = useState<BoardState>(copyBoard(startingBoardState));
 
   useEffect(() => {
-    setBoard(startingBoardState);
-    return;
-  }, [startingBoardState]);
-
-  useEffect(() => {
+    console.log("CHANGING BOARD");
     if (onTetrisStateChange) onTetrisStateChange.boardListener(board);
     return;
   }, [board]);
