@@ -22,7 +22,7 @@ import {
   useRef,
   useCallback,
   RefObject,
-  MutableRefObject,
+  useImperativeHandle,
 } from "react";
 import type { ReactNode } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -30,6 +30,7 @@ import { faCog } from "@fortawesome/free-solid-svg-icons";
 import type { Settings } from "./Settings";
 import EndGame from "./EndGame";
 import BoardPiece from "./BoardPiece";
+import React from "react";
 
 const useDebounce = (
   val: DAS,
@@ -61,10 +62,6 @@ type TetrisProps = {
   height: number;
   startingBoardState: BoardState;
   startingPieceQueue: PieceType[];
-  overrideBoardState: MutableRefObject<string | undefined>;
-  overridePieceQueue: MutableRefObject<PieceType[] | undefined>;
-  overrideCurrentPiece: MutableRefObject<TetrisPiece | undefined>;
-  overrideHoldPiece: MutableRefObject<HeldPiece | undefined>;
   generatePieceQueue: boolean;
   settings: Settings;
   onPointGained?: (
@@ -85,14 +82,6 @@ type TetrisProps = {
   isWin?: boolean;
   children?: ReactNode;
   onBoardClick?: (yMouse: number, xMouse: number) => void;
-  onTetrisStateChange?: TetrisStateListeners;
-};
-
-type TetrisStateListeners = {
-  holdPieceListener: (heldPiece: HeldPiece) => void;
-  queueListener: (queue: PieceType[]) => void;
-  boardListener: (board: BoardState) => void;
-  currentPieceListener: (currentPiece: TetrisPiece) => void;
 };
 
 type Direction = "left" | "right" | null;
@@ -115,15 +104,16 @@ type MoveHistory = {
   previouslyHeldPiece?: PieceType;
 };
 
+export type TetrisRef = {
+  board: BoardState;
+  setBoard: React.Dispatch<React.SetStateAction<string>>;
+}
+
 const Tetris = ({
   width,
   height,
   startingBoardState,
   startingPieceQueue,
-  overrideBoardState,
-  overridePieceQueue,
-  overrideCurrentPiece,
-  overrideHoldPiece,
   generatePieceQueue,
   settings,
   onPointGained,
@@ -134,9 +124,8 @@ const Tetris = ({
   onGameReset,
   isWin = false,
   onBoardClick,
-  onTetrisStateChange,
   children,
-}: TetrisProps) => {
+}: TetrisProps, ref: React.ForwardedRef<TetrisRef>) => {
   const moveHistory = useRef<MoveHistory[]>([]);
 
   const [isSoftDroping, setIsSoftDroping] = useState<boolean>(false);
@@ -202,12 +191,6 @@ const Tetris = ({
     isSlamKicked: false,
   });
 
-  useEffect(() => {
-    if (onTetrisStateChange)
-      onTetrisStateChange.currentPieceListener(currentPiece);
-    return;
-  }, [currentPiece]);
-
   const currentPieceRef = useRef<TetrisPiece>(currentPiece);
 
   const [combo, setCombo] = useState<number>(0);
@@ -216,19 +199,6 @@ const Tetris = ({
     pieceType: "",
     hasHeldPiece: false,
   });
-
-  useEffect(() => {
-    if (onTetrisStateChange)
-      onTetrisStateChange.holdPieceListener(currentHeldPiece);
-    return;
-  }, [currentHeldPiece]);
-
-  useEffect(() => {
-    if (overrideBoardState.current) {
-      setBoard(overrideBoardState.current);
-    }
-    return;
-  }, [overrideBoardState.current]);
 
   const copyBoard = (board: BoardState): BoardState => {
     const newBoard: PieceType[][] = [];
@@ -244,18 +214,11 @@ const Tetris = ({
 
   const [board, setBoard] = useState<BoardState>(copyBoard(startingBoardState));
 
-  useEffect(() => {
-    console.log("CHANGING BOARD");
-    if (onTetrisStateChange) onTetrisStateChange.boardListener(board);
-    return;
-  }, [board]);
+  useImperativeHandle(ref, () => {
+    return {board, setBoard} as TetrisRef
+  }, [board, setBoard])
 
   const [queue, setQueue] = useState<PieceType[]>(startingPieceQueue.slice(1));
-
-  useEffect(() => {
-    if (onTetrisStateChange) onTetrisStateChange.queueListener(queue);
-    return;
-  }, [queue]);
 
   const fillQueueWithBoard = useCallback(
     (queue: PieceType[], board: BoardState): PieceType[] => {
@@ -1055,4 +1018,4 @@ const BoardCanvas = ({ canvasRef, onBoardClick }: BoardCanvasProps) => {
   );
 };
 
-export default Tetris;
+export default React.forwardRef<TetrisRef, TetrisProps>(Tetris);

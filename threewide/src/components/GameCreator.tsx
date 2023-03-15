@@ -12,7 +12,7 @@ import {
   defaultUserSettings,
   startingBoardState,
 } from "@utils/tetris/StartingStates";
-import Tetris from "./Tetris";
+import Tetris, { TetrisRef } from "./Tetris";
 import ColorSelector from "./ColorSelector";
 
 type GameCreatorProps = {
@@ -21,10 +21,8 @@ type GameCreatorProps = {
 
 const GameCreator = ({ userId }: GameCreatorProps) => {
   const [selectedPieceType, setSelectedPieceType] = useState<PieceType>("");
-
-  const [boardState, setBoardState] = useState<BoardState>(
-    startingBoardState as BoardState
-  );
+  
+  const tetrisRef = useRef<TetrisRef>(null);
 
   const userSettings = trpc.user.getUserSettings.useQuery({
     userId: userId,
@@ -85,16 +83,12 @@ const GameCreator = ({ userId }: GameCreatorProps) => {
       return;
     }
 
-    let newBoard = copyBoard(boardState) as unknown as PieceType[][];
+    let newBoard = copyBoard(tetrisRef.current?.board as unknown as BoardState) as unknown as PieceType[][];
     (newBoard[yLocation] as unknown as PieceType[])[xLocation] =
       selectedPieceType;
     console.log(newBoard);
-    gameBoardState.current = newBoard as unknown as BoardState;
-
-    setBoardState(newBoard as unknown as BoardState);
+    tetrisRef.current?.setBoard(newBoard as unknown as BoardState);
   };
-
-  console.log("RERENDERING");
 
   const copyBoard = (board: BoardState): BoardState => {
     const newBoard: PieceType[][] = [];
@@ -107,40 +101,7 @@ const GameCreator = ({ userId }: GameCreatorProps) => {
     }
     return newBoard as unknown as BoardState;
   };
-
-  const gameBoardState = useRef<BoardState>();
-  const gameQueueState = useRef<PieceType[]>();
-  const gameCurrentPieceState = useRef<TetrisPiece>();
-  const gameCurrentHeldPiece = useRef<HeldPiece>();
-
-  const onBoardStateChangeHandler = (newBoard: BoardState) => {
-    gameBoardState.current = newBoard;
-  };
-
-  const onQueueStateChangeHandler = (queue: PieceType[]) => {
-    gameQueueState.current = queue;
-  };
-
-  const onCurrentPieceChangehandler = (currentPiece: TetrisPiece) => {
-    gameCurrentPieceState.current = currentPiece;
-  };
-
-  const onHeldPieceChangeHandler = (heldPiece: HeldPiece) => {
-    gameCurrentHeldPiece.current = heldPiece;
-  };
-
-  const buildTetrisGameKey = () => {
-    let key: string = "";
-
-    for (let row in boardState as unknown as PieceType[][]) {
-      for (let pieceType in row as unknown as PieceType[]) {
-        key += pieceType == "" ? " " : pieceType;
-      }
-    }
-
-    return key;
-  };
-
+  
   return (
     <>
       <div
@@ -156,25 +117,15 @@ const GameCreator = ({ userId }: GameCreatorProps) => {
       />
       <div className="flex flex-col items-center justify-center">
         <Tetris
-          key={buildTetrisGameKey()}
+          ref={tetrisRef}
           width={200}
           height={400}
           startingBoardState={startingBoardState}
           startingPieceQueue={startingBoardQueue}
-          overrideBoardState={gameBoardState}
-          overridePieceQueue={gameQueueState}
-          overrideCurrentPiece={gameCurrentPieceState}
-          overrideHoldPiece={gameCurrentHeldPiece}
           generatePieceQueue={true}
           settings={settings ?? defaultUserSettings}
           onShowSettings={onShowSettingsHandler}
           onBoardClick={onSelectBoardHandler}
-          onTetrisStateChange={{
-            holdPieceListener: onHeldPieceChangeHandler,
-            boardListener: onBoardStateChangeHandler,
-            currentPieceListener: onCurrentPieceChangehandler,
-            queueListener: onQueueStateChangeHandler,
-          }}
         />
         <ColorSelector
           key={`Selected ${selectedPieceType}`}
